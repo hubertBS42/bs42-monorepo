@@ -1,11 +1,63 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "NODE_ENV",
+    "NEXT_PUBLIC_STORE_URL",
+    "NEXT_PUBLIC_ADMIN_URL",
+    "BETTER_AUTH_SECRET",
+    "SITE_MAILER_HOST",
+    "SITE_MAILER_PORT",
+    "SITE_MAILER_EMAIL",
+    "SITE_MAILER_PASSWORD",
+    "COOKIE_DOMAIN",
+    "SEED_SUPERADMIN_EMAIL",
+    "SEED_SUPERADMIN_PASSWORD",
+    "SEED_SUPERADMIN_NAME"
+  ],
   "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "cache": false
+    },
+    "@bs42/db#build": {
+      "dependsOn": ["db:generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"],
+      "cache": false
+    },
+    "@bs42/auth#build": {
+      "dependsOn": ["@bs42/db#build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"],
+      "cache": false
+    },
+    "dev": {
+      "dependsOn": ["@bs42/db#build", "@bs42/auth#build"],
+      "cache": false,
+      "persistent": true
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate:dev": {
+      "cache": false
+    },
+    "db:migrate:deploy": {
+      "cache": false
+    },
+    "db:migrate:reset": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false,
+      "dependsOn": ["db:generate"]
+    },
+    "db:studio": {
+      "cache": false
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -15,10 +67,6 @@
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
     }
   }
 }

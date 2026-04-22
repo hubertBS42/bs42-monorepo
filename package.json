@@ -1,17 +1,27 @@
 {
-  "name": "bs42_20_04_26",
+  "name": "bs42",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "dotenvx run -- turbo build && node scripts/post-build.mjs",
+    "start:admin": "dotenvx run --env-file=.env -- node dist/admin/server.js",
+    "start:store": "dotenvx run --env-file=.env -- node dist/store/server.js",
+    "dev": "dotenvx run -- turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:generate": "dotenvx run -- turbo db:generate",
+    "db:migrate:dev": "dotenvx run -- turbo db:migrate:dev",
+    "db:migrate:deploy": "dotenvx run -- turbo db:migrate:deploy",
+    "db:migrate:reset": "dotenvx run -- turbo db:migrate:reset",
+    "db:studio": "dotenvx run -- turbo db:studio",
+    "db:seed": "dotenvx run -- turbo db:seed",
+    "clean": "node scripts/clean.mjs"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@dotenvx/dotenvx": "^1.60.0",
+    "@bs42/eslint-config": "workspace:*",
+    "@bs42/typescript-config": "workspace:*",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",

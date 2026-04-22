@@ -1,0 +1,37 @@
+{
+  "name": "@bs42/db",
+  "version": "1.0.0",
+  "description": "",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "format": "prisma format",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.2.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "latest",
+    "@prisma/client-runtime-utils": "7.2.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@bs42/eslint-config": "workspace:*",
+    "@bs42/typescript-config": "workspace:*",
+    "@types/node": "^25.6.0",
+    "@types/pg": "^8.16.0",
+    "eslint": "^9.39.2",
+    "prisma": "latest",
+    "tsx": "4.21.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

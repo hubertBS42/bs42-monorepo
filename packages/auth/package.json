@@ -1,0 +1,23 @@
+{
+  "name": "@bs42/auth",
+  "version": "1.0.0",
+  "description": "",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bs42/db": "workspace:*",
+    "better-auth": "^1.6.5"
+  },
+  "devDependencies": {
+    "@bs42/eslint-config": "workspace:*",
+    "@bs42/typescript-config": "workspace:*",
+    "@types/node": "^25.6.0",
+    "eslint": "^9.39.2"
+  },
+  "license": "ISC"
+}

@@ -1,9 +1,9 @@
 {
-  "extends": "@workspace/typescript-config/react-library.json",
+  "extends": "@bs42/typescript-config/react-library.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "jsx": "react",
     "paths": {
-      "@workspace/ui/*": ["./src/*"]
+      "@bs42/ui/*": ["./src/*"]
     }
   },
   "include": ["."],
