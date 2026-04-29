@@ -16,9 +16,9 @@ const hashPassword = async (password: string): Promise<string> => {
 
 async function main() {
   // Clear database
-  // await prisma.invitation.deleteMany()
-  // await prisma.member.deleteMany()
-  // await prisma.organization.deleteMany()
+  await prisma.invitation.deleteMany()
+  await prisma.member.deleteMany()
+  await prisma.organization.deleteMany()
   await prisma.session.deleteMany()
   await prisma.account.deleteMany()
   await prisma.user.deleteMany()
@@ -27,12 +27,12 @@ async function main() {
   console.log("Database cleared")
 
   // Create Global workspace first
-  // const globalWorkspace = await prisma.organization.create({
-  // 	data: {
-  // 		name: 'Global',
-  // 		slug: 'global',
-  // 	},
-  // })
+  const globalWorkspace = await prisma.organization.create({
+    data: {
+      name: "Global",
+      slug: "global",
+    },
+  })
 
   // Create superAdmin (you)
   const superAdmin = await prisma.user.create({
@@ -56,13 +56,13 @@ async function main() {
   })
 
   // SuperAdmin is member of Global workspace
-  // await prisma.member.create({
-  // 	data: {
-  // 		userId: superAdmin.id,
-  // 		organizationId: globalWorkspace.id,
-  // 		role: 'owner',
-  // 	},
-  // })
+  await prisma.member.create({
+    data: {
+      userId: superAdmin.id,
+      organizationId: globalWorkspace.id,
+      role: "owner",
+    },
+  })
 
   console.log("Seed complete")
 }

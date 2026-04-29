@@ -1,2 +1,2 @@
 export { prisma } from "./client.js"
-export * from "../generated/prisma/client.js"
+export { formatPrismaError } from "./format-error.js"

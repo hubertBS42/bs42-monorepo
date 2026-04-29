@@ -20,6 +20,10 @@ const targets = [
   "packages/ui/node_modules",
   "packages/auth/node_modules",
   "packages/auth/dist",
+  "packages/email/node_modules",
+  "packages/email/dist",
+  "packages/utils/node_modules",
+  "packages/types/node_modules",
   // Dist
   "dist",
 ]

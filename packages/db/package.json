@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": "./dist/src/index.js",
+    "./client": "./dist/generated/prisma/client.js",
+    "./enums": "./dist/generated/prisma/enums.js"
   },
   "scripts": {
     "db:generate": "prisma generate",
@@ -18,7 +20,7 @@
   "dependencies": {
     "@noble/hashes": "^2.2.0",
     "@prisma/adapter-pg": "^7.7.0",
-    "@prisma/client": "latest",
+    "@prisma/client": "7.8.0",
     "@prisma/client-runtime-utils": "7.2.0",
     "pg": "^8.16.3"
   },
@@ -28,7 +30,7 @@
     "@types/node": "^25.6.0",
     "@types/pg": "^8.16.0",
     "eslint": "^9.39.2",
-    "prisma": "latest",
+    "prisma": "7.8.0",
     "tsx": "4.21.0"
   },
   "keywords": [],

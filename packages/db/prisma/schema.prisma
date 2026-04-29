@@ -24,7 +24,7 @@ model Address {
   updatedAt DateTime @updatedAt
   isDefault Boolean  @default(false)
 
-  @@map("addresses")
+  @@map("address")
 }
 
 model User {
@@ -50,8 +50,11 @@ model User {
   sessions Session[]
   accounts Account[]
 
+  members     Member[]
+  invitations Invitation[]
+
   @@unique([email])
-  @@map("users")
+  @@map("user")
 }
 
 model Session {
@@ -65,9 +68,12 @@ model Session {
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  impersonatedBy       String?
+  activeOrganizationId String?
+
   @@unique([token])
   @@index([userId])
-  @@map("sessions")
+  @@map("session")
 }
 
 model Account {
@@ -87,7 +93,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
-  @@map("accounts")
+  @@map("account")
 }
 
 model Verification {
@@ -99,5 +105,64 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
-  @@map("verifications")
+  @@map("verification")
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrganizationPlan {
+  BASIC
+  ENTERPRISE
+}
+
+model Organization {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  slug        String
+  logo        String?
+  plan        OrganizationPlan   @default(BASIC)
+  status      OrganizationStatus @default(ACTIVE)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  @@unique([slug])
+  @@map("store")
+}
+
+model Member {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String       @db.Uuid
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("store_member")
+}
+
+model Invitation {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String       @db.Uuid
+  inviter        User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("store_invitation")
 }

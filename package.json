@@ -19,15 +19,15 @@
     "clean": "node scripts/clean.mjs"
   },
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.60.0",
     "@bs42/eslint-config": "workspace:*",
     "@bs42/typescript-config": "workspace:*",
+    "@dotenvx/dotenvx": "^1.60.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",
     "typescript": "5.9.3"
   },
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": ">=20"
   }

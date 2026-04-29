@@ -3,6 +3,8 @@
   "globalEnv": [
     "DATABASE_URL",
     "NODE_ENV",
+    "NEXT_PUBLIC_APP_NAME",
+    "NEXT_PUBLIC_APP_LOGO",
     "NEXT_PUBLIC_STORE_URL",
     "NEXT_PUBLIC_ADMIN_URL",
     "BETTER_AUTH_SECRET",
@@ -13,7 +15,10 @@
     "COOKIE_DOMAIN",
     "SEED_SUPERADMIN_EMAIL",
     "SEED_SUPERADMIN_PASSWORD",
-    "SEED_SUPERADMIN_NAME"
+    "SEED_SUPERADMIN_NAME",
+    "RESET_PASSWORD_TOKEN_EXPIRATON",
+    "INVITATION_EXPIRATON",
+    "SESSION_CACHE_EXPIRATION"
   ],
   "ui": "tui",
   "tasks": {
@@ -35,8 +40,13 @@
       "outputs": ["dist/**"],
       "cache": false
     },
+    "@bs42/email#build": {
+      "dependsOn": [],
+      "outputs": ["dist/**"],
+      "cache": false
+    },
     "dev": {
-      "dependsOn": ["@bs42/db#build", "@bs42/auth#build"],
+      "dependsOn": ["@bs42/db#build", "@bs42/auth#build", "@bs42/email#build"],
       "cache": false,
       "persistent": true
     },

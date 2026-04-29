@@ -16,7 +16,8 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/components/client-only-select.tsx"
   ],
   "exclude": ["node_modules"]
 }

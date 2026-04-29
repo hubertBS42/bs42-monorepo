@@ -1,11 +1,15 @@
 {
   "extends": "@bs42/typescript-config/react-library.json",
   "compilerOptions": {
-    "jsx": "react",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node"],
     "paths": {
       "@bs42/ui/*": ["./src/*"]
     }
   },
-  "include": ["."],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

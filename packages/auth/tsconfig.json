@@ -2,8 +2,6 @@
   "extends": "@bs42/typescript-config/base.json",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "outDir": "./dist",
     "rootDir": ".",
     "declaration": true,

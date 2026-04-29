@@ -10,6 +10,8 @@ import { Metadata } from "next"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: {
     template: `%s - ${APP_NAME}`,

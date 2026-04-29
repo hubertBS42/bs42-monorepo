@@ -1,0 +1,11 @@
+{
+  "name": "@bs42/types",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@bs42/typescript-config": "workspace:*"
+  },
+  "license": "ISC"
+}
