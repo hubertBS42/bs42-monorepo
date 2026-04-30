@@ -5,13 +5,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const links = [
-  { href: "/account", label: "Overview" },
-  { href: "/account/profile", label: "Profile" },
-  { href: "/account/password", label: "Password" },
-  { href: "/account/sessions", label: "Sessions" },
+  { href: "/catalogue", label: "Overview" },
+  { href: "/catalogue/products", label: "Products" },
+  { href: "/catalogue/categories", label: "Categories" },
+  { href: "/catalogue/brands", label: "Brands" },
 ]
 
-const AccountNav = () => {
+const CatalogueNav = () => {
   const pathname = usePathname()
 
   return (
@@ -37,4 +37,4 @@ const AccountNav = () => {
   )
 }
 
-export default AccountNav
+export default CatalogueNav

@@ -18,13 +18,17 @@ const getNavItems = (
         const hasContext = permission.context.includes(currentContext)
         return hasRole && hasContext
       })
-      .map(([url, permission]) => ({
-        url,
-        ...permission.nav!,
-        items: permission.nav?.items?.filter(
+      .map(([url, permission]) => {
+        const filteredSubItems = permission.nav?.items?.filter(
           (item) => !item.context || item.context.includes(currentContext)
-        ),
-      }))
+        )
+
+        return {
+          url,
+          ...permission.nav!,
+          items: filteredSubItems?.length ? filteredSubItems : undefined,
+        }
+      })
       .sort((a, b) => a.order - b.order)
       .reduce(
         (acc, item) => {

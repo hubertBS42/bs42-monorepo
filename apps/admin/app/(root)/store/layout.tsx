@@ -3,7 +3,7 @@ import Header from "./_components/header"
 import { ReactNode } from "react"
 
 export const metadata: Metadata = {
-  title: "Store Overview",
+  description: "Mangage this store's members and invitations",
 }
 
 const StoreLayout = ({ children }: { children: ReactNode }) => {

@@ -1,3 +1,6 @@
+import slugify from "slugify"
+slugify.extend({ ".": "-" })
+
 export function generatePassword(options: {
   useSymbols?: boolean
   useNumbers?: boolean
@@ -26,4 +29,11 @@ export function generatePassword(options: {
   }
 
   return newPassword
+}
+
+export function generateSlug(input: string): string {
+  return slugify(input, {
+    lower: true,
+    strict: true,
+  })
 }

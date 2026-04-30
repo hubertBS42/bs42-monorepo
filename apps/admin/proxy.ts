@@ -119,7 +119,16 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/", request.url))
       }
 
-      if (!permission.context.includes(currentContext)) {
+      // Check sub-item context if path goes deeper than matched route
+      const subItem = permission.nav?.items?.find(
+        (item) =>
+          nextUrl.pathname === item.url ||
+          nextUrl.pathname.startsWith(item.url + "/")
+      )
+
+      const effectiveContext = subItem?.context ?? permission.context
+
+      if (!effectiveContext.includes(currentContext)) {
         return NextResponse.redirect(new URL("/", request.url))
       }
     }

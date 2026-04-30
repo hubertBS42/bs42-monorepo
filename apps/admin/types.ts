@@ -26,6 +26,7 @@ export interface NavItem {
   icon: LucideIcon
   group: "main" | "secondary"
   order: number
+  hideItems?: boolean
   items?: NavSubItem[]
 }
 

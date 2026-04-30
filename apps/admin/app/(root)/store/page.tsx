@@ -13,6 +13,11 @@ import { capitalizeFirstLetter } from "@bs42/utils"
 import { format } from "date-fns"
 import { prisma } from "@bs42/db"
 import StoreActions from "./_components/store-actions"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Store Overview",
+}
 
 const StoreOverviewPage = async () => {
   const session = await auth.api.getSession({ headers: await headers() })

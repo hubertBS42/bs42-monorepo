@@ -74,8 +74,10 @@ const NavMain = () => {
 
   if (isLoading) return <NavMainSkeleton />
 
-  const renderNavItem = (item: NavItem) =>
-    item.items ? (
+  const renderNavItem = (item: NavItem) => {
+    const showAsCollapsible = item.items && !item.hideItems
+
+    return showAsCollapsible ? (
       <Collapsible
         key={item.title}
         asChild
@@ -180,7 +182,7 @@ const NavMain = () => {
         <SidebarMenuButton
           tooltip={item.title}
           asChild
-          isActive={isActive(item.url)}
+          isActive={isActive(item.url) || hasActiveChild(item.items)}
         >
           <Link href={item.url} onClick={() => setOpenMobile(false)}>
             {item.icon && <item.icon />}
@@ -189,6 +191,7 @@ const NavMain = () => {
         </SidebarMenuButton>
       </SidebarMenuItem>
     )
+  }
 
   return (
     <>

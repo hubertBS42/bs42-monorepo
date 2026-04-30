@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   LucideIcon,
   ScrollTextIcon,
+  ShoppingBag,
   UsersIcon,
 } from "lucide-react"
 import { SystemRole } from "@bs42/auth"
@@ -16,6 +17,7 @@ interface RoutePermission {
     icon: LucideIcon
     group: "main" | "secondary"
     order: number
+    hideItems?: boolean
     items?: NavSubItem[]
   }
 }
@@ -61,14 +63,38 @@ export const routePermissions: Record<string, RoutePermission> = {
       order: 4,
     },
   },
+  "/catalogue": {
+    role: ["superAdmin", "admin", "user"],
+    context: ["store"],
+    nav: {
+      title: "Catalogue",
+      icon: ShoppingBag,
+      group: "main",
+      order: 2,
+      items: [
+        { title: "Products", url: "/catalogue/products", context: ["store"] },
+        {
+          title: "Categories",
+          url: "/catalogue/categories",
+          context: ["store"],
+        },
+        {
+          title: "Brands",
+          url: "/catalogue/brands",
+          context: ["store"],
+        },
+      ],
+    },
+  },
   "/store": {
     role: ["superAdmin", "admin", "user"],
     context: ["store"],
     nav: {
       title: "Store",
       icon: Building2,
-      group: "main",
-      order: 2,
+      group: "secondary",
+      order: 1,
+      hideItems: true,
       items: [
         {
           title: "Members",

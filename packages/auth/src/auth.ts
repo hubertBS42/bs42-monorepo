@@ -89,7 +89,6 @@ export function createAuth(baseURL?: string) {
       database: {
         generateId: false,
       },
-
       // crossSubDomainCookies: {
       //   enabled: true,
       //   domain: process.env.COOKIE_DOMAIN,

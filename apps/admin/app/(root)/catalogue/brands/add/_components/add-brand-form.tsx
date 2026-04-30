@@ -9,34 +9,34 @@ import {
   CardTitle,
 } from "@bs42/ui/components/card"
 import { Field, FieldGroup, FieldLabel } from "@bs42/ui/components/field"
-import { STORE_PLAN_OPTIONS, STORE_STATUS_OPTIONS } from "@/constants"
 import { authClient } from "@/lib/auth-client"
-import { addStoreFormSchema } from "@/lib/zod"
+import { addBrandFormSchema } from "@/lib/zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
+import slugify from "slugify"
 import { toast } from "@bs42/ui/components/sonner"
 import { Checkbox } from "@bs42/ui/components/checkbox"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { useEffect, useState, useTransition } from "react"
-import { StorePlan, StoreStatus } from "@/types"
 import { generateSlug } from "@/lib/utils"
 
-const AddStoreForm = () => {
+const AddBrandForm = () => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [autoGenSlug, setAutoGenSlug] = useState(true)
 
-  const form = useForm<z.infer<typeof addStoreFormSchema>>({
-    resolver: zodResolver(addStoreFormSchema),
+  const form = useForm<z.infer<typeof addBrandFormSchema>>({
+    resolver: zodResolver(addBrandFormSchema),
     defaultValues: {
       name: "",
-      slug: "",
       logo: "",
-      plan: StorePlan.BASIC,
-      status: StoreStatus.ACTIVE,
+      description: "",
+      isFeatured: false,
+      status: "DRAFT",
+      website: "",
     },
   })
 
@@ -46,6 +46,7 @@ const AddStoreForm = () => {
   useEffect(() => {
     if (!autoGenSlug) return
     const slugified = generateSlug(nameValue)
+
     form.setValue("slug", slugified, { shouldDirty: false }) // keep dirty state clean
   }, [nameValue, autoGenSlug, form])
 
@@ -53,13 +54,17 @@ const AddStoreForm = () => {
     setAutoGenSlug(checked)
     if (checked) {
       // Re-generate slug from current name when re-enabling
-      const slugified = generateSlug(nameValue)
+      const slugified = slugify(nameValue, {
+        lower: true,
+        strict: true,
+        remove: /\./g,
+      })
       form.setValue("slug", slugified, { shouldDirty: false })
     }
   }
 
-  const onSubmit: SubmitHandler<z.infer<typeof addStoreFormSchema>> = async (
-    storeData
+  const onSubmit: SubmitHandler<z.infer<typeof addBrandFormSchema>> = async (
+    brandData
   ) => {
     startTransition(async () => {
       const { error: checkSlugError } = await authClient.organization.checkSlug(
@@ -204,4 +209,4 @@ const AddStoreForm = () => {
   )
 }
 
-export default AddStoreForm
+export default AddBrandForm

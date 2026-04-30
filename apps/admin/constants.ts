@@ -47,6 +47,91 @@ export const BREADCRUMB_DATA: BreadcrumbConfig[] = [
     ],
   },
   {
+    pathname: "/catalogue",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/products",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Products", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/products/add",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Products", href: "/catalogue/products" },
+      { text: "Add Product", href: "#" },
+    ],
+  },
+  {
+    pathname: "catalogue/products/[id]/edit",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Products", href: "/catalogue/products" },
+      { text: "Edit Product", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/categories",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Categories", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/categories/add",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Categories", href: "/catalogue/categories" },
+      { text: "Add Category", href: "#" },
+    ],
+  },
+  {
+    pathname: "catalogue/categories/[id]/edit",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Categories", href: "/catalogue/categories" },
+      { text: "Edit Category", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/brands",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Brands", href: "#" },
+    ],
+  },
+  {
+    pathname: "/catalogue/brands/add",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Brands", href: "/catalogue/brands" },
+      { text: "Add Brand", href: "#" },
+    ],
+  },
+  {
+    pathname: "catalogue/brands/[id]/edit",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Catalogue", href: "/catalogue" },
+      { text: "Manage Brands", href: "/catalogue/brands" },
+      { text: "Edit Brand", href: "#" },
+    ],
+  },
+  {
     pathname: "/users",
     segments: [
       { text: "Dashboard", href: "/" },

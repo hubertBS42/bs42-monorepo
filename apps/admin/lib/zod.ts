@@ -1,6 +1,8 @@
 import { STORE_ROLE_NAMES } from "@bs42/auth"
 import { StorePlan, StoreStatus } from "@/types"
+import { Status } from "@bs42/db/enums"
 import { z } from "zod"
+import { isURL } from "validator"
 
 export const signInFormSchema = z.object({
   email: z.email("Invalid email address"),
@@ -113,7 +115,7 @@ export const inviteMemberFormSchema = z.object({
 const slugSchema = z
   .string()
   .min(1, "You must provide a store slug")
-  .min(3, "Store slug must be at least 3 characters")
+  .min(3, "Slug must be at least 3 characters")
   .max(63, "Slug must be 63 characters or less")
   .regex(
     /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -155,3 +157,23 @@ export const updatePasswordFormSchema = z
     message: "New password must be different from current password",
     path: ["newPassword"],
   })
+
+export const addBrandFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, "You must provide a brand name.")
+    .min(3, "Brand name must be at least 3 characters."),
+  slug: slugSchema,
+  logo: z.string().min(1, "You must provide a logo."),
+  website: z
+    .string()
+    .refine((url) => !url || isURL(url), { message: "Invalid website URL." }),
+  description: z.string().nullable(),
+  isFeatured: z.boolean(),
+  status: z.enum(Status),
+})
+
+// Schema for updating brand
+export const updateBrandFormSchema = addBrandFormSchema.extend({
+  id: z.string().min(1, "ID is required"),
+})

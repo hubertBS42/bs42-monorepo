@@ -18,7 +18,7 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Member Details",
+  title: "Store Member Details",
 }
 
 type MemberDetailsPageProps = {

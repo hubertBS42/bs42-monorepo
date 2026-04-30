@@ -1,0 +1,23 @@
+import AddButton from "@/components/add-button"
+import { Metadata } from "next"
+
+export const metadata: Metadata = { title: "Manage Categories" }
+
+const CategoriesPage = async () => {
+  return (
+    <main className="flex flex-col gap-y-6">
+      <div className="flex items-end justify-between">
+        <div className="grid">
+          <h1 className="text-xl font-bold md:text-2xl">Manage Categories</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your store&apos;s product categories.
+          </p>
+        </div>
+
+        <AddButton label="Add Category" url="/catalogue/categories/add" />
+      </div>
+    </main>
+  )
+}
+
+export default CategoriesPage
