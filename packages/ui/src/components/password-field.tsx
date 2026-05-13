@@ -1,18 +1,11 @@
 "use client"
 import { Control, Controller, FieldValues, Path } from "react-hook-form"
 import { Field, FieldDescription, FieldError, FieldLabel } from "./field"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "./input-group"
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./input-group"
 import { Eye, EyeClosed } from "lucide-react"
 import { useState } from "react"
 
-interface PasswordFieldProps<
-  T extends FieldValues,
-> extends React.InputHTMLAttributes<HTMLInputElement> {
+interface PasswordFieldProps<T extends FieldValues> extends React.InputHTMLAttributes<HTMLInputElement> {
   control: Control<T>
   name: Path<T>
   label?: string
@@ -20,14 +13,7 @@ interface PasswordFieldProps<
   resetPasswordSlot?: React.ReactNode
 }
 
-const PasswordField = <T extends FieldValues>({
-  control,
-  name,
-  description,
-  label,
-  resetPasswordSlot,
-  ...inputProps
-}: PasswordFieldProps<T>) => {
+const PasswordField = <T extends FieldValues>({ control, name, description, label, resetPasswordSlot, ...inputProps }: PasswordFieldProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -38,20 +24,9 @@ const PasswordField = <T extends FieldValues>({
         <Field data-invalid={fieldState.invalid} className="grid gap-y-1">
           {label && <FieldLabel htmlFor={name}>{label}</FieldLabel>}
           <InputGroup>
-            <InputGroupInput
-              {...field}
-              id={name}
-              aria-invalid={fieldState.invalid}
-              type={showPassword ? "text" : "password"}
-              {...inputProps}
-            />
+            <InputGroupInput {...field} id={name} aria-invalid={fieldState.invalid} type={showPassword ? "text" : "password"} {...inputProps} />
             <InputGroupAddon align={"inline-end"}>
-              <InputGroupButton
-                aria-label={showPassword ? "Hide" : "Show"}
-                title={showPassword ? "Hide" : "Show"}
-                size="icon-xs"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <InputGroupButton aria-label={showPassword ? "Hide" : "Show"} title={showPassword ? "Hide" : "Show"} size="icon-xs" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeClosed /> : <Eye />}
               </InputGroupButton>
             </InputGroupAddon>

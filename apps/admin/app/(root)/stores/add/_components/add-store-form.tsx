@@ -1,15 +1,9 @@
 "use client"
 import InputField from "@bs42/ui/components/input-field"
 import SelectField from "@bs42/ui/components/select-field"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
-import { Field, FieldGroup, FieldLabel } from "@bs42/ui/components/field"
-import { STORE_PLAN_OPTIONS, STORE_STATUS_OPTIONS } from "@/constants"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
+import { FieldGroup } from "@bs42/ui/components/field"
+import { STORE_STATUS_OPTIONS } from "@/constants"
 import { authClient } from "@/lib/auth-client"
 import { addStoreFormSchema } from "@/lib/zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,69 +11,37 @@ import { useRouter } from "next/navigation"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 import { toast } from "@bs42/ui/components/sonner"
-import { Checkbox } from "@bs42/ui/components/checkbox"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
-import { useEffect, useState, useTransition } from "react"
-import { StorePlan, StoreStatus } from "@/types"
-import { generateSlug } from "@/lib/utils"
+import { useTransition } from "react"
+import { StoreStatus } from "@/types"
+import ImageField from "@bs42/ui/components/image-field"
+import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
+import DescriptionField from "@/components/description-field"
 
 const AddStoreForm = () => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [autoGenSlug, setAutoGenSlug] = useState(true)
 
   const form = useForm<z.infer<typeof addStoreFormSchema>>({
     resolver: zodResolver(addStoreFormSchema),
     defaultValues: {
       name: "",
-      slug: "",
       logo: "",
-      plan: StorePlan.BASIC,
+      returnsPolicy: null,
+      shippingPolicy: null,
       status: StoreStatus.ACTIVE,
     },
   })
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const nameValue = form.watch("name")
-
-  useEffect(() => {
-    if (!autoGenSlug) return
-    const slugified = generateSlug(nameValue)
-    form.setValue("slug", slugified, { shouldDirty: false }) // keep dirty state clean
-  }, [nameValue, autoGenSlug, form])
-
-  const handleAutoGenSlug = (checked: boolean) => {
-    setAutoGenSlug(checked)
-    if (checked) {
-      // Re-generate slug from current name when re-enabling
-      const slugified = generateSlug(nameValue)
-      form.setValue("slug", slugified, { shouldDirty: false })
-    }
-  }
-
-  const onSubmit: SubmitHandler<z.infer<typeof addStoreFormSchema>> = async (
-    storeData
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof addStoreFormSchema>> = async (storeData) => {
     startTransition(async () => {
-      const { error: checkSlugError } = await authClient.organization.checkSlug(
-        {
-          slug: storeData.slug,
-        }
-      )
-
-      if (checkSlugError) {
-        return form.setError("slug", {
-          type: "custom",
-          message: checkSlugError.message,
-        })
-      }
-
       const { error: createOrgErr } = await authClient.organization.create({
         name: storeData.name,
-        slug: storeData.slug,
+        slug: "undefined",
         logo: !storeData.logo ? undefined : storeData.logo,
-        plan: storeData.plan,
+        returnsPolicy: storeData.returnsPolicy ?? undefined,
+        shippingPolicy: storeData.shippingPolicy ?? undefined,
         status: storeData.status,
         keepCurrentActiveOrganization: true,
       })
@@ -93,8 +55,22 @@ const AddStoreForm = () => {
     })
   }
 
+  const handleAddLogo = async (data: FileList) => {
+    const formData = new FormData()
+    Array.from(data).forEach((file) => formData.append("files", file))
+    return uploadImagesAction(formData)
+  }
+
+  const handleRemoveLogo = async (url: string) => {
+    await deleteFilesAction([url])
+  }
+
   const handleDiscard = async () => {
-    router.push("/stores")
+    startTransition(async () => {
+      const image = form.getValues("logo")
+      if (image?.trim()) await deleteFilesAction([image])
+      router.push("/stores")
+    })
   }
 
   return (
@@ -116,57 +92,28 @@ const AddStoreForm = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Store Details</CardTitle>
-                  <CardDescription>
-                    Configure the basic information and settings for your store.
-                  </CardDescription>
+                  <CardDescription>Configure the basic information and settings for your store.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FieldGroup>
-                    <InputField
-                      control={form.control}
-                      label="Name"
-                      name="name"
-                      disabled={isPending}
-                      autoFocus
-                    />
-
-                    <Field>
-                      <InputField
-                        control={form.control}
-                        label="Slug"
-                        name="slug"
-                        disabled={autoGenSlug || isPending}
-                      />
-                      <Field orientation="horizontal">
-                        <Checkbox
-                          id="autoGenSlug"
-                          checked={autoGenSlug}
-                          onCheckedChange={(checked) =>
-                            handleAutoGenSlug(Boolean(checked))
-                          }
-                        />
-                        <FieldLabel
-                          htmlFor="autoGenSlug"
-                          className="font-light"
-                        >
-                          Auto generate slug
-                        </FieldLabel>
-                      </Field>
-                    </Field>
-                    <SelectField
-                      control={form.control}
-                      label="Plan"
-                      name="plan"
-                      disabled={isPending}
-                      loadingPlaceholder="Basic"
-                      options={STORE_PLAN_OPTIONS}
-                    />
-                    <InputField
+                    <ImageField
                       control={form.control}
                       name="logo"
-                      label="Logo URL"
+                      sizeLimit={100}
+                      maxImages={1}
+                      onAdd={handleAddLogo}
+                      onRemove={handleRemoveLogo}
+                      clearErrors={form.clearErrors}
+                      label="Logo"
                       disabled={isPending}
+                      className="max-w-25"
                     />
+
+                    <InputField control={form.control} label="Name" name="name" disabled={isPending} autoFocus />
+
+                    <DescriptionField control={form.control} label="Shipping Policy" name="shippingPolicy" placeholder="Write something..." disabled={isPending} />
+
+                    <DescriptionField control={form.control} label="Returns Policy" name="returnsPolicy" placeholder="Write something..." disabled={isPending} />
                   </FieldGroup>
                 </CardContent>
               </Card>
@@ -175,29 +122,16 @@ const AddStoreForm = () => {
             {/* Right column */}
             <Card>
               <CardHeader>
-                <CardTitle>Store Status</CardTitle>
-                <CardDescription>
-                  Set the status for this store.
-                </CardDescription>
+                <CardTitle>Status</CardTitle>
+                <CardDescription>Set the status for this store.</CardDescription>
               </CardHeader>
               <CardContent>
-                <SelectField
-                  control={form.control}
-                  name="status"
-                  disabled={isPending}
-                  loadingPlaceholder="Active"
-                  options={STORE_STATUS_OPTIONS}
-                />
+                <SelectField control={form.control} name="status" disabled={isPending} loadingPlaceholder="Active" options={STORE_STATUS_OPTIONS} />
               </CardContent>
             </Card>
           </div>
 
-          <ResourceFormFooter
-            backTo="/stores"
-            isPending={isPending}
-            isDirty={form.formState.isDirty}
-            handleDiscard={handleDiscard}
-          />
+          <ResourceFormFooter backTo="/stores" isPending={isPending} isDirty={form.formState.isDirty} handleDiscard={handleDiscard} />
         </div>
       </div>
     </form>

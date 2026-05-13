@@ -1,12 +1,6 @@
 "use client"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { FieldGroup } from "@bs42/ui/components/field"
 import { signInFormSchema } from "@/lib/zod"
 import { useTransition } from "react"
@@ -32,9 +26,7 @@ export function SignInForm({ callbackURL }: { callbackURL: string }) {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof signInFormSchema>> = async (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof signInFormSchema>> = async (data) => {
     startTransition(async () => {
       await authClient.signIn.email(
         {
@@ -80,16 +72,7 @@ export function SignInForm({ callbackURL }: { callbackURL: string }) {
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            <InputField
-              control={form.control}
-              name="email"
-              label="Email"
-              placeholder="john@example.com"
-              type="email"
-              disabled={isPending}
-              autoFocus
-              required
-            />
+            <InputField control={form.control} name="email" label="Email" placeholder="john@example.com" type="email" disabled={isPending} autoFocus required />
 
             <PasswordField
               control={form.control}
@@ -97,10 +80,7 @@ export function SignInForm({ callbackURL }: { callbackURL: string }) {
               label="Password"
               disabled={isPending}
               resetPasswordSlot={
-                <Link
-                  href="/reset-password"
-                  className="text-sm underline-offset-4 hover:underline"
-                >
+                <Link href="/reset-password" className="text-sm underline-offset-4 hover:underline">
                   Forgot your password?
                 </Link>
               }

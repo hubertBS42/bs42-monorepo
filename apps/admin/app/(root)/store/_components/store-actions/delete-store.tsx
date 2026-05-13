@@ -18,19 +18,20 @@ import { authClient } from "@/lib/auth-client"
 import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
 import { StoreRole } from "@bs42/auth"
-import { Skeleton } from "@bs42/ui/components/skeleton"
 import { Trash2 } from "lucide-react"
 import { useStoreSwitcher } from "@/hooks/use-store-switch"
+import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 
 const DeleteStore = ({ store }: { store: Store }) => {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
   const { switchStore, isSwitching } = useStoreSwitcher()
-  const { data, isPending: isActiveMemberRoleLoading } =
-    authClient.useActiveMemberRole()
+  const { data, isPending: activeMemberRoleIsLoading } = authClient.useActiveMemberRole()
+
+  if (activeMemberRoleIsLoading || !data) return <ButtonSkeleton />
 
   const canDelete = authClient.organization.checkRolePermission({
-    role: (data?.role ?? "member") as StoreRole,
+    role: (data.role ?? "member") as StoreRole,
     permissions: {
       organization: ["delete"],
     },
@@ -50,22 +51,17 @@ const DeleteStore = ({ store }: { store: Store }) => {
           onSuccess: async () => {
             // Switch to global workspace after deletion
             await switchStore({ storeSlug: "global" })
+            toast.success(`${store.name} has been deleted successfully.`)
           },
         }
       )
     })
   }
 
-  if (isActiveMemberRoleLoading) return <Skeleton className="h-9 rounded-md" />
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          variant="destructive"
-          className="w-full"
-          disabled={!canDelete}
-        >
+        <Button type="button" variant="destructive" className="w-full" disabled={!canDelete}>
           <Trash2 className="size-4" />
           Delete Store
         </Button>
@@ -73,12 +69,10 @@ const DeleteStore = ({ store }: { store: Store }) => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>{`This action cannot be undone. ${store.name} and all its call recordings will be permanently deleted.`}</AlertDialogDescription>
+          <AlertDialogDescription>{`This action cannot be undone. ${store.name} and all related data will be permanently deleted.`}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending || isSwitching}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending || isSwitching}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()

@@ -131,34 +131,17 @@ const FiltersToolbar = ({ filters }: FiltersToolbarProps) => {
               />
             )}
             {filter.type === "numberRange" && (
-              <NumberRangeFilter
-                minKey={`${filter.key}Min`}
-                maxKey={`${filter.key}Max`}
-                values={values}
-                setValues={setValues}
-                applyFilters={applyFilters}
-                isPending={isPending}
-              />
+              <NumberRangeFilter minKey={`${filter.key}Min`} maxKey={`${filter.key}Max`} values={values} setValues={setValues} applyFilters={applyFilters} isPending={isPending} />
             )}
           </div>
         ))}
       </div>
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => applyFilters()}
-          disabled={isPending}
-        >
+        <Button size="sm" variant="outline" onClick={() => applyFilters()} disabled={isPending}>
           Search
         </Button>
         {isFiltered && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={clearFilters}
-            disabled={isPending}
-          >
+          <Button size="sm" variant="ghost" onClick={clearFilters} disabled={isPending}>
             <X className="size-4" />
             Reset Filters
           </Button>

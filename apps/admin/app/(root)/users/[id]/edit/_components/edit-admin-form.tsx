@@ -1,6 +1,6 @@
 "use client"
 
-import { UserWithSessionsAndMemberships } from "@/types"
+import { UserDetails } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
@@ -12,8 +12,9 @@ import UserFormFields from "./user-form-fields"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { updateUserAction } from "@/lib/actions/user.actions"
+import { deleteFilesAction, restoreFilesAction } from "@/lib/actions/storage.actions"
 
-const EditAdminForm = ({ user }: { user: UserWithSessionsAndMemberships }) => {
+const EditAdminForm = ({ user }: { user: UserDetails }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -27,11 +28,8 @@ const EditAdminForm = ({ user }: { user: UserWithSessionsAndMemberships }) => {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof editAdminFormSchema>> = async (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof editAdminFormSchema>> = async (data) => {
     startTransition(async () => {
-      console.log(data)
       const result = await updateUserAction({
         id: data.id,
         name: data.name,
@@ -49,7 +47,28 @@ const EditAdminForm = ({ user }: { user: UserWithSessionsAndMemberships }) => {
     })
   }
 
-  const handleDiscard = async () => router.push("/users")
+  const handleDiscard = async () => {
+    startTransition(async () => {
+      const image = form.getValues("image")
+      // delete new image
+      if (image && !user.image) {
+        await deleteFilesAction([image])
+      }
+
+      // delete new image and restore previous image
+      if (image && user.image && image !== user.image) {
+        await deleteFilesAction([image])
+        await restoreFilesAction([user.image])
+      }
+
+      // restore deleted image
+      if (!image && user.image) {
+        await restoreFilesAction([user.image])
+      }
+
+      router.push("/users")
+    })
+  }
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -64,18 +83,9 @@ const EditAdminForm = ({ user }: { user: UserWithSessionsAndMemberships }) => {
         />
 
         <div className="grid gap-8">
-          <UserFormFields
-            control={form.control}
-            user={user}
-            isPending={isPending}
-          />
+          <UserFormFields control={form.control} user={user} isPending={isPending} clearErrors={form.clearErrors} />
 
-          <ResourceFormFooter
-            backTo="/users"
-            isPending={isPending}
-            isDirty={form.formState.isDirty}
-            handleDiscard={handleDiscard}
-          />
+          <ResourceFormFooter backTo="/users" isPending={isPending} isDirty={form.formState.isDirty} handleDiscard={handleDiscard} />
         </div>
       </div>
     </form>

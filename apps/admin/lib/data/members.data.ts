@@ -1,18 +1,12 @@
 "server-only"
-import {
-  MembersData,
-  MembersFilters,
-  MemberWithUserWithSessions,
-} from "@/types"
+import { MembersData, MembersFilters, MemberDetails } from "@/types"
 import { headers } from "next/headers"
 import { auth } from "../auth"
 import { formatError } from "@bs42/auth/server"
 import { prisma } from "@bs42/db"
 import { DataResponse } from "@bs42/types"
 
-export const fetchStoreMembers = async (
-  filters: MembersFilters = {}
-): Promise<DataResponse<MembersData>> => {
+export const getStoreMembers = async (filters: MembersFilters = {}): Promise<DataResponse<MembersData>> => {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }
@@ -30,9 +24,7 @@ export const fetchStoreMembers = async (
       },
     }
 
-    const orderBy = sort
-      ? { [sort]: order ?? "asc" }
-      : { createdAt: "desc" as const }
+    const orderBy = sort ? { [sort]: order ?? "asc" } : { createdAt: "desc" as const }
 
     const [members, total] = await Promise.all([
       prisma.member.findMany({
@@ -60,9 +52,7 @@ export const fetchStoreMembers = async (
   }
 }
 
-export const getStoreMemberById = async (
-  memberId: string
-): Promise<DataResponse<MemberWithUserWithSessions | null>> => {
+export const getStoreMemberById = async (memberId: string): Promise<DataResponse<MemberDetails>> => {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }

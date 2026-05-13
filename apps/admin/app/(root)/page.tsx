@@ -22,11 +22,7 @@ const Dashboard = async () => {
     <div className="grid gap-4 md:gap-6">
       <div className="grid">
         <h1 className="text-xl font-bold md:text-2xl">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          {isGlobal
-            ? "Platform overview across all stores."
-            : "Overview of your store's resources."}
-        </p>
+        <p className="text-sm text-muted-foreground">{isGlobal ? "Platform overview across all stores." : "Overview of your store's resources."}</p>
       </div>
       {/* <Suspense fallback={<SectionCardsSkeleton />}>{isGlobal ? <GlobalSectionCards /> : <OrgSectionCards />}</Suspense>
 

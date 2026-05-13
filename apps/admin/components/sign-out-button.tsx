@@ -9,20 +9,11 @@ import { Spinner } from "@bs42/ui/components/spinner"
 import { toast } from "@bs42/ui/components/sonner"
 
 interface SignOutButtonProps {
-  variant?:
-    | "default"
-    | "outline"
-    | "ghost"
-    | "destructive"
-    | "secondary"
-    | "link"
+  variant?: "default" | "outline" | "ghost" | "destructive" | "secondary" | "link"
   className?: string
 }
 
-const SignOutButton = ({
-  variant = "outline",
-  className,
-}: SignOutButtonProps) => {
+const SignOutButton = ({ variant = "outline", className }: SignOutButtonProps) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -44,12 +35,7 @@ const SignOutButton = ({
   }
 
   return (
-    <Button
-      variant={variant}
-      className={className}
-      onClick={handleSignOut}
-      disabled={isPending}
-    >
+    <Button variant={variant} className={className} onClick={handleSignOut} disabled={isPending}>
       {isPending ? <Spinner /> : <LogOut className="size-4" />}
       {isPending ? "Signing Out..." : "Sign Out"}
     </Button>

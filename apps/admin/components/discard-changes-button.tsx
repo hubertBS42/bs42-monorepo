@@ -13,40 +13,33 @@ import {
   AlertDialogTrigger,
 } from "@bs42/ui/components/alert-dialog"
 import { Button } from "@bs42/ui/components/button"
+import { useState } from "react"
+import { Spinner } from "@bs42/ui/components/spinner"
 
-const DiscardChangesButton = ({
-  isLoading,
-  isDisabled,
-  handleDiscard,
-}: {
-  isLoading?: boolean
-  isDisabled?: boolean
-  handleDiscard: () => Promise<void>
-}) => {
+const DiscardChangesButton = ({ isLoading, isDisabled, handleDiscard }: { isLoading?: boolean; isDisabled?: boolean; handleDiscard: () => Promise<void> | void }) => {
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          variant={"destructive"}
-          size={"sm"}
-          disabled={isLoading || isDisabled}
-          type="button"
-        >
+        <Button variant={"destructive"} size={"sm"} disabled={isLoading || isDisabled} type="button">
           <Trash /> Discard Changes
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. Are you sure you want to leave this page?
-            Any unsaved data will be lost.
-          </AlertDialogDescription>
+          <AlertDialogDescription>You have unsaved changes. Are you sure you want to leave this page? Any unsaved data will be lost.</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleDiscard()}>
-            Continue
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault()
+              handleDiscard()
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? <Spinner /> : "Continue"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -6,17 +6,10 @@ import { useTransition } from "react"
 import { Button } from "@bs42/ui/components/button"
 import { Spinner } from "@bs42/ui/components/spinner"
 import { toast } from "@bs42/ui/components/sonner"
-import {
-  acceptInvitationAction,
-  rejectInvitationAction,
-} from "@/lib/actions/invitation.actions"
-import { InvitationWithInviterWithStore } from "@/types"
+import { acceptInvitationAction, rejectInvitationAction } from "@/lib/actions/invitation.actions"
+import { InvitationDetails } from "@/types"
 
-const AcceptInvitationUI = ({
-  invitation,
-}: {
-  invitation: InvitationWithInviterWithStore
-}) => {
+const AcceptInvitationUI = ({ invitation }: { invitation: InvitationDetails }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -68,19 +61,10 @@ const AcceptInvitationUI = ({
           <p className="text-sm text-muted-foreground">{`You have been invited by ${invitation.inviter.name} to join ${invitation.organization.name} as ${invitation.role}. Would you like to accept?`}</p>
         </div>
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={handleReject}
-            disabled={isPending}
-          >
+          <Button variant="outline" className="flex-1" onClick={handleReject} disabled={isPending}>
             {isPending ? <Spinner /> : "Decline"}
           </Button>
-          <Button
-            className="flex-1"
-            onClick={handleAccept}
-            disabled={isPending}
-          >
+          <Button className="flex-1" onClick={handleAccept} disabled={isPending}>
             {isPending ? <Spinner /> : "Accept"}
           </Button>
         </div>

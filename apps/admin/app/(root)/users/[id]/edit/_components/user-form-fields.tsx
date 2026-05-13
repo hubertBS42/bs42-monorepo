@@ -1,39 +1,42 @@
 "use client"
 
 import InputField from "@bs42/ui/components/input-field"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Badge } from "@bs42/ui/components/badge"
-import { UserWithSessionsAndMemberships } from "@/types"
+import { UserDetails } from "@/types"
 import { capitalizeFirstLetter } from "@bs42/utils"
 import { format } from "date-fns"
-import { Control, FieldValues, Path } from "react-hook-form"
+import { Control, FieldValues, Path, UseFormClearErrors } from "react-hook-form"
 import dynamic from "next/dynamic"
-import { Skeleton } from "@bs42/ui/components/skeleton"
 import { Field, FieldLabel } from "@bs42/ui/components/field"
 import { Input } from "@bs42/ui/components/input"
+import ImageField from "@bs42/ui/components/image-field"
+import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
+import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 
 const UserActions = dynamic(() => import("./user-actions"), {
   ssr: false,
-  loading: () => <Skeleton className="h-10 w-full" />,
+  loading: () => <ButtonSkeleton />,
 })
 
 interface UserFormFieldsProps<T extends FieldValues> {
   control: Control<T>
-  user: UserWithSessionsAndMemberships
+  user: UserDetails
   isPending: boolean
+  clearErrors: UseFormClearErrors<T>
 }
 
-const UserFormFields = <T extends FieldValues>({
-  control,
-  user,
-  isPending,
-}: UserFormFieldsProps<T>) => {
+const UserFormFields = <T extends FieldValues>({ control, user, isPending, clearErrors }: UserFormFieldsProps<T>) => {
+  const handleAddAvatar = async (data: FileList) => {
+    const formData = new FormData()
+    Array.from(data).forEach((file) => formData.append("files", file))
+    return uploadImagesAction(formData)
+  }
+
+  const handleRemoveAvatar = async (url: string) => {
+    await deleteFilesAction([url])
+  }
+
   return (
     <div className="grid items-stretch gap-4 lg:grid-cols-3">
       <div className="lg:col-span-2">
@@ -44,29 +47,25 @@ const UserFormFields = <T extends FieldValues>({
             <CardDescription>Basic information about the user.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-5">
-            <InputField
+            <ImageField
               control={control}
-              label="Full Name"
-              name={"name" as Path<T>}
+              name={"image" as Path<T>}
+              sizeLimit={100}
+              maxImages={1}
+              onAdd={handleAddAvatar}
+              onRemove={handleRemoveAvatar}
+              clearErrors={clearErrors}
+              label="Avatar"
               disabled={isPending}
+              className="max-w-25"
+              defaultValues={user.image}
             />
-            <InputField
-              control={control}
-              label="Email"
-              name={"email" as Path<T>}
-              type="email"
-              disabled
-            />
+            <InputField control={control} label="Full Name" name={"name" as Path<T>} disabled={isPending} />
+            <InputField control={control} label="Email" name={"email" as Path<T>} type="email" disabled />
             <Field className="gap-y-1">
               <FieldLabel>System Role</FieldLabel>
               <Input defaultValue={capitalizeFirstLetter(user.role)} disabled />
             </Field>
-            <InputField
-              control={control}
-              name={"image" as Path<T>}
-              label="Avatar URL"
-              disabled={isPending}
-            />
           </CardContent>
         </Card>
       </div>
@@ -77,11 +76,7 @@ const UserFormFields = <T extends FieldValues>({
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Status
-              {user.banned ? (
-                <Badge variant="destructive">Banned</Badge>
-              ) : (
-                <Badge>Active</Badge>
-              )}
+              {user.banned ? <Badge variant="destructive">Banned</Badge> : <Badge variant="success">Active</Badge>}
             </CardTitle>
           </CardHeader>
           {user.banned && (
@@ -93,11 +88,7 @@ const UserFormFields = <T extends FieldValues>({
                 </div>
                 <div>
                   <h3 className="font-medium">Ban Expiration:</h3>
-                  <p className="text-muted-foreground">
-                    {user.banExpires
-                      ? format(user.banExpires, "LLL dd, y")
-                      : "N/A"}
-                  </p>
+                  <p className="text-muted-foreground">{user.banExpires ? format(user.banExpires, "LLL dd, y") : "N/A"}</p>
                 </div>
               </div>
             </CardContent>

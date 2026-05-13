@@ -1,12 +1,7 @@
 "use client"
 
 import { NavUserSkeleton } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-} from "@bs42/ui/components/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@bs42/ui/components/sidebar"
 import dynamic from "next/dynamic"
 import { StoreSwitcherSkeleton } from "@/components/store-switcher"
 import { NavMainSkeleton } from "@/components/nav"

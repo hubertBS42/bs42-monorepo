@@ -1,12 +1,7 @@
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Button } from "@bs42/ui/components/button"
 import { ShoppingBag, Tag, Building2, ArrowRightIcon } from "lucide-react"
 import Link from "next/link"
@@ -19,13 +14,13 @@ const catalogueLinks = [
     href: "/catalogue/products",
     icon: ShoppingBag,
     title: "Products",
-    description: "Manage your product listings, prices and inventory",
+    description: "Manage the products to be listed in stores",
   },
   {
     href: "/catalogue/categories",
     icon: Tag,
     title: "Categories",
-    description: "Organise products into categories",
+    description: "Manage the categories associated with your products",
   },
   {
     href: "/catalogue/brands",
@@ -44,9 +39,7 @@ const CataloguePage = async () => {
       <div className="flex items-end justify-between">
         <div className="grid">
           <h1 className="text-xl font-bold md:text-2xl">Catelogue</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your store&apos;s products, categories and brands.
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your products, categories and brands.</p>
         </div>
 
         {/* <AddButton label="Add User" url="/users/add" /> */}
@@ -56,10 +49,7 @@ const CataloguePage = async () => {
         {catalogueLinks.map((link) => {
           const Icon = link.icon
           return (
-            <Card
-              key={link.href}
-              className="transition-colors hover:bg-accent/50"
-            >
+            <Card key={link.href} className="transition-colors hover:bg-accent/50">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">

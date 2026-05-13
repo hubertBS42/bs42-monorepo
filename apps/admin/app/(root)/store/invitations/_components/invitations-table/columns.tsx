@@ -6,29 +6,20 @@ import { formatDistanceToNow } from "date-fns"
 import ColumnHeader from "@/components/data-table/column-header"
 import { capitalizeFirstLetter } from "@bs42/utils"
 import InvitationActions from "./actions"
-import { InvitationWithInviter } from "@/types"
+import { InvitationForTable } from "@/types"
 import { Checkbox } from "@bs42/ui/components/checkbox"
 
-export const columns: ColumnDef<InvitationWithInviter>[] = [
+export const columns: ColumnDef<InvitationForTable>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
     enableSorting: false,
     enableHiding: false,
   },
@@ -39,11 +30,7 @@ export const columns: ColumnDef<InvitationWithInviter>[] = [
   {
     accessorKey: "role",
     header: () => <ColumnHeader title="Role" sortKey="role" />,
-    cell: ({ row }) => (
-      <Badge variant="outline">
-        {capitalizeFirstLetter(row.original.role as string)}
-      </Badge>
-    ),
+    cell: ({ row }) => <Badge variant="outline">{capitalizeFirstLetter(row.original.role as string)}</Badge>,
   },
   {
     id: "inviter",
@@ -57,12 +44,8 @@ export const columns: ColumnDef<InvitationWithInviter>[] = [
       const expiresAt = new Date(row.original.expiresAt)
       const isExpired = expiresAt < new Date()
       return (
-        <span
-          className={`${isExpired ? "text-destructive" : "text-muted-foreground"}`}
-        >
-          {isExpired
-            ? `Expired ${formatDistanceToNow(expiresAt, { addSuffix: true })}`
-            : formatDistanceToNow(expiresAt, { addSuffix: true })}
+        <span className={`${isExpired ? "text-destructive" : "text-muted-foreground"}`}>
+          {isExpired ? `Expired ${formatDistanceToNow(expiresAt, { addSuffix: true })}` : formatDistanceToNow(expiresAt, { addSuffix: true })}
         </span>
       )
     },

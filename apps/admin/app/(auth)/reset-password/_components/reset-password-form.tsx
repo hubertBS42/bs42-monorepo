@@ -1,13 +1,7 @@
 "use client"
 import InputField from "@bs42/ui/components/input-field"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Field, FieldDescription, FieldGroup } from "@bs42/ui/components/field"
 import { Spinner } from "@bs42/ui/components/spinner"
 import { requestPasswordResetAction } from "@/lib/actions/user.actions"
@@ -30,9 +24,7 @@ export function ResetPasswordForm() {
     mode: "onChange",
   })
 
-  const onSubmit: SubmitHandler<
-    z.infer<typeof resetPasswordFormSchema>
-  > = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof resetPasswordFormSchema>> = async (data) => {
     startTransition(async () => {
       const response = await requestPasswordResetAction({
         email: data.email,
@@ -53,10 +45,7 @@ export function ResetPasswordForm() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Reset link sent</CardTitle>
-          <CardDescription>
-            Thank you. If an account with that email exists, we&apos;ve sent a
-            password reset link to your inbox.
-          </CardDescription>
+          <CardDescription>Thank you. If an account with that email exists, we&apos;ve sent a password reset link to your inbox.</CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">
@@ -70,23 +59,12 @@ export function ResetPasswordForm() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-xl">Forgot your password</CardTitle>
-        <CardDescription>
-          Enter your email below to reset your password
-        </CardDescription>
+        <CardDescription>Enter your email below to reset your password</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            <InputField
-              control={form.control}
-              name="email"
-              label="Email"
-              placeholder="john@example.com"
-              type="email"
-              disabled={isPending}
-              autoFocus
-              required
-            />
+            <InputField control={form.control} name="email" label="Email" placeholder="john@example.com" type="email" disabled={isPending} autoFocus required />
             <Field>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Spinner />}

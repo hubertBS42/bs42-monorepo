@@ -1,13 +1,6 @@
 "use client"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@bs42/ui/components/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@bs42/ui/components/dialog"
 import { Button } from "@bs42/ui/components/button"
 import { FieldGroup } from "@bs42/ui/components/field"
 import InputField from "@bs42/ui/components/input-field"
@@ -22,12 +15,14 @@ import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "@bs42/ui/components/sonner"
 import { z } from "zod"
 import { Spinner } from "@bs42/ui/components/spinner"
-import RoleSelector from "@/components/role-selector"
 import { inviteMemberAction } from "@/lib/actions/invitation.actions"
+import SelectField from "@bs42/ui/components/select-field"
+import { useRouter } from "next/navigation"
 
 const InviteMemberModal = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof inviteMemberFormSchema>>({
     resolver: zodResolver(inviteMemberFormSchema),
@@ -37,8 +32,7 @@ const InviteMemberModal = () => {
     },
   })
 
-  const { data: activeMember, isPending: isActiveMemberLoading } =
-    authClient.useActiveMember()
+  const { data: activeMember, isPending: isActiveMemberLoading } = authClient.useActiveMember()
 
   if (isActiveMemberLoading || !activeMember) return null
 
@@ -47,13 +41,9 @@ const InviteMemberModal = () => {
     permissions: { invitation: ["create"] },
   })
 
-  const roleOptions = STORE_ROLE_NAMES.filter((role) => role !== "owner").map(
-    (role) => ({ label: capitalizeFirstLetter(role), value: role })
-  )
+  const roleOptions = STORE_ROLE_NAMES.filter((role) => role !== "owner").map((role) => ({ label: capitalizeFirstLetter(role), value: role }))
 
-  const onSubmit: SubmitHandler<
-    z.infer<typeof inviteMemberFormSchema>
-  > = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof inviteMemberFormSchema>> = async (data) => {
     startTransition(async () => {
       const response = await inviteMemberAction({
         email: data.email,
@@ -72,11 +62,12 @@ const InviteMemberModal = () => {
         return
       }
 
+      form.reset()
+      setIsOpen(false)
+      router.refresh()
       toast.success("Invitation sent", {
         description: `An invitation has been sent to ${data.email}.`,
       })
-      form.reset()
-      setIsOpen(false)
     })
   }
 
@@ -99,28 +90,14 @@ const InviteMemberModal = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Invite Member</DialogTitle>
-          <DialogDescription>
-            Send an invitation to a new member to join this store.
-          </DialogDescription>
+          <DialogDescription>Send an invitation to a new member to join this store.</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid gap-6">
             <FieldGroup>
-              <InputField
-                control={form.control}
-                label="Email"
-                name="email"
-                type="email"
-                disabled={isPending}
-                autoFocus
-              />
-              <RoleSelector
-                control={form.control}
-                isDisabled={isPending}
-                isPending={isPending}
-                options={roleOptions}
-                permissionType="store"
-              />
+              <InputField control={form.control} label="Email" name="email" type="email" disabled={isPending} autoFocus />
+              <SelectField control={form.control} label="Role" name="role" disabled={isPending} options={roleOptions} loadingPlaceholder="Member" />
+              {/* <RoleSelector control={form.control} isDisabled={isPending} isPending={isPending} options={roleOptions} permissionType="store" /> */}
             </FieldGroup>
             <div className="flex justify-end gap-2">
               <Button
@@ -134,10 +111,7 @@ const InviteMemberModal = () => {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isPending || !form.formState.isDirty}
-              >
+              <Button type="submit" disabled={isPending || !form.formState.isDirty}>
                 {isPending ? <Spinner /> : "Send Invite"}
               </Button>
             </div>

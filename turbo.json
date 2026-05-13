@@ -18,7 +18,11 @@
     "SEED_SUPERADMIN_NAME",
     "RESET_PASSWORD_TOKEN_EXPIRATON",
     "INVITATION_EXPIRATON",
-    "SESSION_CACHE_EXPIRATION"
+    "SESSION_CACHE_EXPIRATION",
+    "AZURE_STORAGE_ACCOUNT_NAME",
+    "AZURE_CLIENT_ID",
+    "AZURE_TENANT_ID",
+    "AZURE_CLIENT_SECRET"
   ],
   "ui": "tui",
   "tasks": {
@@ -28,8 +32,13 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "cache": false
     },
+    "@bs42/storage#build": {
+      "dependsOn": [],
+      "outputs": ["dist/**"],
+      "cache": false
+    },
     "@bs42/db#build": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": ["db:generate", "@bs42/storage#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"],
       "cache": false
@@ -46,7 +55,12 @@
       "cache": false
     },
     "dev": {
-      "dependsOn": ["@bs42/db#build", "@bs42/auth#build", "@bs42/email#build"],
+      "dependsOn": [
+        "@bs42/db#build",
+        "@bs42/auth#build",
+        "@bs42/email#build",
+        "@bs42/storage#build"
+      ],
       "cache": false,
       "persistent": true
     },

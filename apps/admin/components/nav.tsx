@@ -15,11 +15,7 @@ import {
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@bs42/ui/components/collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@bs42/ui/components/collapsible"
 import { cn } from "@bs42/ui/lib/utils"
 import { Skeleton } from "@bs42/ui/components/skeleton"
 import { NavItem, NavSubItem } from "@/types"
@@ -78,17 +74,9 @@ const NavMain = () => {
     const showAsCollapsible = item.items && !item.hideItems
 
     return showAsCollapsible ? (
-      <Collapsible
-        key={item.title}
-        asChild
-        defaultOpen={isActive(item.url) || hasActiveChild(item.items)}
-      >
+      <Collapsible key={item.title} asChild defaultOpen={isActive(item.url) || hasActiveChild(item.items)}>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            tooltip={item.title}
-            isActive={isActive(item.url) || hasActiveChild(item.items)}
-          >
+          <SidebarMenuButton asChild tooltip={item.title} isActive={isActive(item.url) || hasActiveChild(item.items)}>
             <Link href={item.url}>
               {item.icon && <item.icon />}
               <span>{item.title}</span>
@@ -103,27 +91,16 @@ const NavMain = () => {
           <CollapsibleContent>
             <SidebarMenuSub>
               {item.items?.map((subItem) => (
-                <Collapsible
-                  key={subItem.title}
-                  asChild
-                  defaultOpen={
-                    isActive(subItem.url) || hasActiveChild(subItem.items)
-                  }
-                >
+                <Collapsible key={subItem.title} asChild defaultOpen={isActive(subItem.url) || hasActiveChild(subItem.items)}>
                   <SidebarMenuSubItem>
                     {subItem.items ? (
                       <>
                         <SidebarMenuSubButton asChild>
                           <Link
                             href={subItem.url}
-                            className={cn(
-                              "flex w-full items-center justify-between",
-                              {
-                                "bg-accent text-accent-foreground":
-                                  isActive(subItem.url) ||
-                                  hasActiveChild(subItem.items),
-                              }
-                            )}
+                            className={cn("flex w-full items-center justify-between", {
+                              "bg-accent text-accent-foreground": isActive(subItem.url) || hasActiveChild(subItem.items),
+                            })}
                           >
                             {subItem.icon && <subItem.icon />}
                             <span>{subItem.title}</span>
@@ -139,14 +116,8 @@ const NavMain = () => {
                           <SidebarMenuSub className="ml-4">
                             {subItem.items.map((nestedItem) => (
                               <SidebarMenuSubItem key={nestedItem.title}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={isActive(nestedItem.url)}
-                                >
-                                  <Link
-                                    href={nestedItem.url}
-                                    onClick={() => setOpenMobile(false)}
-                                  >
+                                <SidebarMenuSubButton asChild isActive={isActive(nestedItem.url)}>
+                                  <Link href={nestedItem.url} onClick={() => setOpenMobile(false)}>
                                     {nestedItem.icon && <nestedItem.icon />}
                                     <span>{nestedItem.title}</span>
                                   </Link>
@@ -157,14 +128,8 @@ const NavMain = () => {
                         </CollapsibleContent>
                       </>
                     ) : (
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive(subItem.url)}
-                      >
-                        <Link
-                          href={subItem.url}
-                          onClick={() => setOpenMobile(false)}
-                        >
+                      <SidebarMenuSubButton asChild isActive={isActive(subItem.url)}>
+                        <Link href={subItem.url} onClick={() => setOpenMobile(false)}>
                           {subItem.icon && <subItem.icon />}
                           <span>{subItem.title}</span>
                         </Link>
@@ -179,11 +144,7 @@ const NavMain = () => {
       </Collapsible>
     ) : (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton
-          tooltip={item.title}
-          asChild
-          isActive={isActive(item.url) || hasActiveChild(item.items)}
-        >
+        <SidebarMenuButton tooltip={item.title} asChild isActive={isActive(item.url) || hasActiveChild(item.items)}>
           <Link href={item.url} onClick={() => setOpenMobile(false)}>
             {item.icon && <item.icon />}
             <span>{item.title}</span>
@@ -207,9 +168,7 @@ const NavMain = () => {
               </SidebarMenu>
             )}
 
-            <SidebarMenu>
-              {navItems.main?.map((item) => renderNavItem(item))}
-            </SidebarMenu>
+            <SidebarMenu>{navItems.main?.map((item) => renderNavItem(item))}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       )}
@@ -218,9 +177,7 @@ const NavMain = () => {
       {navItems.secondary && (
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.secondary.map((item) => renderNavItem(item))}
-            </SidebarMenu>
+            <SidebarMenu>{navItems.secondary.map((item) => renderNavItem(item))}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       )}

@@ -8,11 +8,7 @@ import SignOutButton from "@/components/sign-out-button"
 
 type MemberWithOrganization = Member & { organization: Organization }
 
-const RemovedFromStore = ({
-  memberships,
-}: {
-  memberships: MemberWithOrganization[]
-}) => {
+const RemovedFromStore = ({ memberships }: { memberships: MemberWithOrganization[] }) => {
   const { switchStore, isSwitching } = useStoreSwitcher()
 
   const hasOtherOrgs = memberships.length > 0
@@ -27,9 +23,7 @@ const RemovedFromStore = ({
           <h1 className="text-2xl font-bold">Removed From Store</h1>
           <p className="text-sm text-muted-foreground">
             You have been removed from this store.
-            {hasOtherOrgs
-              ? " You can switch to another store or sign out."
-              : " You no longer have access to any stores."}
+            {hasOtherOrgs ? " You can switch to another store or sign out." : " You no longer have access to any stores."}
           </p>
         </div>
 

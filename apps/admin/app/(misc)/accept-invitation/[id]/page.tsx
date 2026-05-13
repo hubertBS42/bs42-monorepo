@@ -21,11 +21,7 @@ const AcceptInvitationPage = async ({ params }: AcceptInvitationPageProps) => {
     include: { inviter: true, organization: true },
   })
 
-  if (
-    !invitation ||
-    invitation.status !== "pending" ||
-    new Date() > invitation.expiresAt
-  ) {
+  if (!invitation || invitation.status !== "pending" || new Date() > invitation.expiresAt) {
     redirect("/sign-in")
   }
 

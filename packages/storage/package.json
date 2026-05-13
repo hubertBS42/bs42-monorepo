@@ -1,0 +1,19 @@
+{
+  "name": "@bs42/storage",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@azure/identity": "4.13.1",
+    "@azure/storage-blob": "12.31.0"
+  },
+  "devDependencies": {
+    "@bs42/typescript-config": "workspace:*",
+    "@types/node": "^25.6.0"
+  },
+  "license": "ISC"
+}

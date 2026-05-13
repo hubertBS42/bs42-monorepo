@@ -43,11 +43,7 @@ const ResetPassword = ({ user }: { user: User }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          className="w-full text-red-500 hover:bg-red-50 hover:text-red-700"
-          variant={"outline"}
-        >
+        <Button type="button" className="w-full text-red-500 hover:bg-red-50 hover:text-red-700" variant={"outline"}>
           <RotateCcw />
           Reset Password
         </Button>
@@ -66,11 +62,7 @@ const ResetPassword = ({ user }: { user: User }) => {
             }}
             disabled={isPending}
           >
-            {isPending ? (
-              <Loader className="size-4 animate-spin" />
-            ) : (
-              "Continue"
-            )}
+            {isPending ? <Loader className="size-4 animate-spin" /> : "Continue"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

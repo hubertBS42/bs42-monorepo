@@ -47,11 +47,7 @@ const UnbanUser = ({ user }: { user: User }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          className="w-full text-red-500 hover:bg-red-50 hover:text-red-700"
-          variant={"outline"}
-        >
+        <Button type="button" className="w-full text-red-500 hover:bg-red-50 hover:text-red-700" variant={"outline"}>
           <ShieldCheck className="size-5" /> Unban User
         </Button>
       </AlertDialogTrigger>

@@ -6,21 +6,12 @@ import { StoreRole } from "@bs42/auth"
 import { formatError } from "@bs42/auth/server"
 import { prisma } from "@bs42/db"
 
-export async function inviteMemberAction({
-  email,
-  role,
-  session,
-}: {
-  email: string
-  role: StoreRole
-  session?: Session
-}) {
+export async function inviteMemberAction({ email, role, session }: { email: string; role: StoreRole; session?: Session }) {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     const activeStoreId = sessionData.session.activeOrganizationId
@@ -48,19 +39,12 @@ export async function inviteMemberAction({
   }
 }
 
-export async function acceptInvitationAction({
-  invitationId,
-  session,
-}: {
-  invitationId: string
-  session?: Session
-}) {
+export async function acceptInvitationAction({ invitationId, session }: { invitationId: string; session?: Session }) {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     await auth.api.acceptInvitation({
@@ -76,19 +60,12 @@ export async function acceptInvitationAction({
   }
 }
 
-export async function rejectInvitationAction({
-  invitationId,
-  session,
-}: {
-  invitationId: string
-  session?: Session
-}) {
+export async function rejectInvitationAction({ invitationId, session }: { invitationId: string; session?: Session }) {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     await auth.api.rejectInvitation({

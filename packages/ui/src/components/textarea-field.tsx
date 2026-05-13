@@ -4,22 +4,14 @@ import { Textarea } from "./textarea"
 import React from "react"
 import { Field, FieldDescription, FieldError, FieldLabel } from "./field"
 
-interface TextAreaFieldProps<
-  T extends FieldValues,
-> extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaFieldProps<T extends FieldValues> extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   control: Control<T>
   name: Path<T>
   label?: string
   description?: string
 }
 
-const TextAreaField = <T extends FieldValues>({
-  control,
-  name,
-  description,
-  label,
-  ...textAreaProps
-}: TextAreaFieldProps<T>) => {
+const TextAreaField = <T extends FieldValues>({ control, name, description, label, ...textAreaProps }: TextAreaFieldProps<T>) => {
   return (
     <Controller
       control={control}

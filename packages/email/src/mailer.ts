@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-import { render } from "@react-email/render"
+import { render } from "react-email"
 import { ReactElement } from "react"
 import {
   APP_NAME,

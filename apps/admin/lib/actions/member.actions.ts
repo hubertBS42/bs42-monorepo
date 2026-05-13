@@ -5,25 +5,14 @@ import { headers } from "next/headers"
 import { StoreRole } from "@bs42/auth"
 import { formatError } from "@bs42/auth/server"
 import { prisma } from "@bs42/db"
-import { redirect } from "next/navigation"
+import { ActionResponse } from "@bs42/types"
 
-export async function addStoreMemberAction({
-  userId,
-  storeId,
-  role,
-  session,
-}: {
-  userId: string
-  storeId: string
-  role: StoreRole
-  session?: Session
-}) {
+export async function addStoreMemberAction({ userId, storeId, role, session }: { userId: string; storeId: string; role: StoreRole; session?: Session }): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     // Fetch store and user in parallel
@@ -56,21 +45,12 @@ export async function addStoreMemberAction({
   }
 }
 
-export async function removeStoreMemberAction({
-  memberId,
-  storeId,
-  session,
-}: {
-  memberId: string
-  storeId: string
-  session?: Session
-}) {
+export async function removeStoreMemberAction({ memberId, storeId, session }: { memberId: string; storeId: string; session?: Session }): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     await auth.api.removeMember({
@@ -80,11 +60,10 @@ export async function removeStoreMemberAction({
       },
       headers: headersObj,
     })
+    return { success: true }
   } catch (error) {
     return { success: false, error: formatError(error) }
   }
-
-  redirect("/store/members?success=Member+removed+successfully")
 }
 
 export async function updateStoreMemberRoleAction({
@@ -97,13 +76,12 @@ export async function updateStoreMemberRoleAction({
   storeId: string
   role: string
   session?: Session
-}) {
+}): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     const member = await prisma.member.findUnique({
@@ -132,19 +110,12 @@ export async function updateStoreMemberRoleAction({
   }
 }
 
-export async function leaveStoreAction({
-  storeId,
-  session,
-}: {
-  storeId: string
-  session?: Session
-}) {
+export async function leaveStoreAction({ storeId, session }: { storeId: string; session?: Session }): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
 
     // Use provided session or fetch it
-    const sessionData =
-      session ?? (await auth.api.getSession({ headers: headersObj }))
+    const sessionData = session ?? (await auth.api.getSession({ headers: headersObj }))
     if (!sessionData) return { success: false, error: "Unauthorized" }
 
     const store = await prisma.organization.findUnique({
@@ -160,9 +131,9 @@ export async function leaveStoreAction({
       },
       headers: headersObj,
     })
+
+    return { success: true }
   } catch (error) {
     return { success: false, error: formatError(error) }
   }
-
-  redirect("/removed-from-store?success=You+have+left+the+store")
 }

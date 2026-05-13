@@ -1,110 +1,55 @@
 "use client"
 import InputField from "@bs42/ui/components/input-field"
 import SelectField from "@bs42/ui/components/select-field"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
-import { Checkbox } from "@bs42/ui/components/checkbox"
-import { Field, FieldGroup, FieldLabel } from "@bs42/ui/components/field"
-import { STORE_PLAN_OPTIONS, STORE_STATUS_OPTIONS } from "@/constants"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
+import { FieldGroup } from "@bs42/ui/components/field"
+import { STORE_STATUS_OPTIONS } from "@/constants"
 import { authClient } from "@/lib/auth-client"
 import { updateStoreFormSchema } from "@/lib/zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { notFound, useRouter } from "next/navigation"
-import { use, useEffect, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
-import slugify from "slugify"
 import { toast } from "@bs42/ui/components/sonner"
 import { z } from "zod"
-import DeleteStore from "./delete-store"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
-import { DataResponse } from "@bs42/types"
-import { Store, StorePlan, StoreStatus } from "@/types"
+import { Store, StoreStatus } from "@/types"
+import { deleteFilesAction, restoreFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
+import ImageField from "@bs42/ui/components/image-field"
+import dynamic from "next/dynamic"
+import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
+import DescriptionField from "@/components/description-field"
 
-const EditStoreForm = ({
-  data,
-}: {
-  data: Promise<DataResponse<Store | null>>
-}) => {
-  const response = use(data)
-  if (!response.success) throw new Error(response.error)
-  if (!response.data) notFound()
+const DeleteStore = dynamic(() => import("./delete-store"), {
+  ssr: false,
+  loading: () => <ButtonSkeleton />,
+})
 
-  const store = response.data
-
+const EditStoreForm = ({ store }: { store: Store }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [autoGenSlug, setAutoGenSlug] = useState(false)
 
   const form = useForm<z.infer<typeof updateStoreFormSchema>>({
     resolver: zodResolver(updateStoreFormSchema),
     defaultValues: {
       id: store.id,
       name: store.name,
-      slug: store.slug,
       logo: store.logo ?? "",
-      plan: store.plan as StorePlan,
+      returnsPolicy: store.returnsPolicy,
+      shippingPolicy: store.shippingPolicy,
       status: store.status as StoreStatus,
     },
   })
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const nameValue = form.watch("name")
-
-  useEffect(() => {
-    if (!autoGenSlug) return
-
-    const slugified = slugify(nameValue, {
-      lower: true,
-      strict: true,
-      remove: /\./g,
-    })
-    form.setValue("slug", slugified, { shouldDirty: false })
-  }, [nameValue, autoGenSlug, form])
-
-  const handleAutoGenSlug = (checked: boolean) => {
-    setAutoGenSlug(checked)
-    if (checked) {
-      // Re-generate slug from current name when re-enabling
-      const slugified = slugify(nameValue, {
-        lower: true,
-        strict: true,
-        remove: /\./g,
-      })
-      form.setValue("slug", slugified, { shouldDirty: false })
-    }
-  }
-
-  const onSubmit: SubmitHandler<z.infer<typeof updateStoreFormSchema>> = async (
-    storeData
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof updateStoreFormSchema>> = async (storeData) => {
     startTransition(async () => {
-      // Check slug availability only if it changed
-      if (storeData.slug !== store.slug) {
-        const { error: checkSlugError } =
-          await authClient.organization.checkSlug({
-            slug: storeData.slug,
-          })
-
-        if (checkSlugError) {
-          return form.setError("slug", {
-            type: "custom",
-            message: checkSlugError.message,
-          })
-        }
-      }
-
       const { error: updateStoreErr } = await authClient.organization.update({
         data: {
           name: storeData.name,
-          slug: storeData.slug,
           logo: storeData.logo,
-          plan: storeData.plan,
+          returnsPolicy: storeData.returnsPolicy ?? "",
+          shippingPolicy: storeData.shippingPolicy ?? "",
           status: storeData.status,
         },
         organizationId: store.id,
@@ -119,8 +64,36 @@ const EditStoreForm = ({
       router.push("/stores")
     })
   }
+  const handleAddLogo = async (data: FileList) => {
+    const formData = new FormData()
+    Array.from(data).forEach((file) => formData.append("files", file))
+    return uploadImagesAction(formData)
+  }
+
+  const handleRemoveLogo = async (url: string) => {
+    await deleteFilesAction([url])
+  }
   const handleDiscard = async () => {
-    router.push("/stores")
+    startTransition(async () => {
+      const logo = form.getValues("logo")
+      // delete new logo
+      if (logo && !store.logo) {
+        await deleteFilesAction([logo])
+      }
+
+      // delete new logo and restore previous logo
+      if (logo && store.logo && logo !== store.logo) {
+        await deleteFilesAction([logo])
+        await restoreFilesAction([store.logo])
+      }
+
+      // restore deleted logo
+      if (!logo && store.logo) {
+        await restoreFilesAction([store.logo])
+      }
+
+      router.push("/stores")
+    })
   }
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -141,56 +114,28 @@ const EditStoreForm = ({
               <Card>
                 <CardHeader>
                   <CardTitle>Store Details</CardTitle>
-                  <CardDescription>
-                    Configure the basic information and settings for this store.
-                  </CardDescription>
+                  <CardDescription>Configure the basic information and settings for this store.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FieldGroup>
-                    <InputField
-                      control={form.control}
-                      label="Name"
-                      name="name"
-                      disabled={isPending}
-                      autoFocus
-                    />
-                    <Field>
-                      <InputField
-                        control={form.control}
-                        label="Slug"
-                        name="slug"
-                        disabled={autoGenSlug || isPending}
-                      />
-                      <Field orientation="horizontal">
-                        <Checkbox
-                          id="autoGenSlug"
-                          checked={autoGenSlug}
-                          onCheckedChange={(checked) =>
-                            handleAutoGenSlug(Boolean(checked))
-                          }
-                        />
-                        <FieldLabel
-                          htmlFor="autoGenSlug"
-                          className="font-light"
-                        >
-                          Auto generate slug
-                        </FieldLabel>
-                      </Field>
-                    </Field>
-                    <SelectField
-                      control={form.control}
-                      label="Plan"
-                      name="plan"
-                      disabled={isPending}
-                      loadingPlaceholder="Basic"
-                      options={STORE_PLAN_OPTIONS}
-                    />
-                    <InputField
+                    <ImageField
                       control={form.control}
                       name="logo"
-                      label="Logo URL"
+                      sizeLimit={100}
+                      maxImages={1}
+                      onAdd={handleAddLogo}
+                      onRemove={handleRemoveLogo}
+                      clearErrors={form.clearErrors}
+                      label="Logo"
                       disabled={isPending}
+                      className="max-w-25"
+                      defaultValues={store.logo}
                     />
+                    <InputField control={form.control} label="Name" name="name" disabled={isPending} autoFocus />
+
+                    <DescriptionField control={form.control} label="Shipping Policy" name="shippingPolicy" placeholder="Write something..." disabled={isPending} />
+
+                    <DescriptionField control={form.control} label="Returns Policy" name="returnsPolicy" placeholder="Write something..." disabled={isPending} />
                   </FieldGroup>
                 </CardContent>
               </Card>
@@ -200,29 +145,18 @@ const EditStoreForm = ({
             <div className="grid gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Store Status</CardTitle>
-                  <CardDescription>
-                    Set the status for this store.
-                  </CardDescription>
+                  <CardTitle>Status</CardTitle>
+                  <CardDescription>Set the status for this store.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SelectField
-                    control={form.control}
-                    name="status"
-                    disabled={isPending}
-                    loadingPlaceholder="Active"
-                    options={STORE_STATUS_OPTIONS}
-                  />
+                  <SelectField control={form.control} name="status" disabled={isPending} loadingPlaceholder="Active" options={STORE_STATUS_OPTIONS} />
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
                   <CardTitle>Danger Zone</CardTitle>
-                  <CardDescription>
-                    Permanently delete this organization and all associated
-                    data.
-                  </CardDescription>
+                  <CardDescription>Permanently delete this organization and all associated data.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <DeleteStore store={store} />
@@ -230,12 +164,7 @@ const EditStoreForm = ({
               </Card>
             </div>
           </div>
-          <ResourceFormFooter
-            backTo="/stores"
-            isPending={isPending}
-            isDirty={form.formState.isDirty}
-            handleDiscard={handleDiscard}
-          />
+          <ResourceFormFooter backTo="/stores" isPending={isPending} isDirty={form.formState.isDirty} handleDiscard={handleDiscard} />
         </div>
       </div>
     </form>

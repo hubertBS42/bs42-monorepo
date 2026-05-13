@@ -1,19 +1,13 @@
 "use client"
 
-import { MemberWithUserWithSessions } from "@/types"
+import { MemberDetails } from "@/types"
 import { authClient } from "@/lib/auth-client"
 import RemoveMember from "./remove-member"
 import { StoreRole } from "@bs42/auth"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 
 interface MemberActionsProps {
-  member: MemberWithUserWithSessions
+  member: MemberDetails
 }
 
 const MemberActions = ({ member }: MemberActionsProps) => {

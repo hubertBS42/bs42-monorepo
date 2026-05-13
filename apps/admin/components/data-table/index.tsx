@@ -1,31 +1,12 @@
 "use client"
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@bs42/ui/components/table"
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@bs42/ui/components/table"
 import { cn } from "@bs42/ui/lib/utils"
 import FiltersToolbar from "./filters-toolbar"
 import Pagination from "./pagination"
 
-export type FilterType =
-  | "text"
-  | "select"
-  | "date"
-  | "dateRange"
-  | "number"
-  | "numberRange"
-  | "boolean"
+export type FilterType = "text" | "select" | "date" | "dateRange" | "number" | "numberRange" | "boolean"
 
 export interface FilterConfig {
   key: string
@@ -51,14 +32,7 @@ interface DataTableProps<TData, TValue> {
   enablePagination?: boolean
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-  filters = [],
-  pagination,
-  onRowClick,
-  enablePagination = true,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, filters = [], pagination, onRowClick, enablePagination = true }: DataTableProps<TData, TValue>) {
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
@@ -87,12 +61,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, idx) => (
                   <TableHead key={header.id} className={cn(idx === 0 && "w-7")}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -101,33 +70,17 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn(onRowClick && "cursor-pointer")}
-                  onClick={() => onRowClick?.(row.original)}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className={cn(onRowClick && "cursor-pointer")} onClick={() => onRowClick?.(row.original)}>
                   {row.getVisibleCells().map((cell, idx) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        idx === row.getVisibleCells().length - 1 && "w-7"
-                      )}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                    <TableCell key={cell.id} className={cn(idx === row.getVisibleCells().length - 1 && "w-7")}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No Results.
                 </TableCell>
               </TableRow>

@@ -1,13 +1,6 @@
 "use client"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@bs42/ui/components/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@bs42/ui/components/dialog"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useTransition } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -31,9 +24,7 @@ const ChangePassword = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<
-    z.infer<typeof changePasswordFormSchema>
-  > = async (values) => {
+  const onSubmit: SubmitHandler<z.infer<typeof changePasswordFormSchema>> = async (values) => {
     startTransition(async () => {
       await authClient.changePassword(
         {
@@ -69,11 +60,7 @@ const ChangePassword = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          className="w-full text-red-500 hover:bg-red-50 hover:text-red-700"
-          variant={"outline"}
-        >
+        <Button type="button" className="w-full text-red-500 hover:bg-red-50 hover:text-red-700" variant={"outline"}>
           <KeyRound className="size-4" />
           Change Password
         </Button>
@@ -81,45 +68,22 @@ const ChangePassword = () => {
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>
-            Enter your current password and choose a new one to update your
-            password.
-          </DialogDescription>
+          <DialogDescription>Enter your current password and choose a new one to update your password.</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <PasswordField
-                control={form.control}
-                name="currentPassword"
-                label="Current Password"
-                disabled={isPending}
-              />
+              <PasswordField control={form.control} name="currentPassword" label="Current Password" disabled={isPending} />
             </div>
 
             <div className="col-span-2">
-              <PasswordField
-                control={form.control}
-                name="password"
-                label="New Password"
-                disabled={isPending}
-              />
+              <PasswordField control={form.control} name="password" label="New Password" disabled={isPending} />
             </div>
             <div className="col-span-2">
-              <PasswordField
-                control={form.control}
-                name="confirmPassword"
-                label="Confirm Password"
-                disabled={isPending}
-              />
+              <PasswordField control={form.control} name="confirmPassword" label="Confirm Password" disabled={isPending} />
             </div>
             <div className="col-span-2">
-              <Button
-                className="w-full"
-                type="button"
-                onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={isPending}
-              >
+              <Button className="w-full" type="button" onClick={() => form.handleSubmit(onSubmit)()} disabled={isPending}>
                 {isPending ? (
                   <Loader className="h-4 w-4 animate-spin" />
                 ) : (

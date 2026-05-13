@@ -4,13 +4,7 @@ import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { formatError } from "@bs42/auth/server"
 
-export async function updateProfileAction({
-  name,
-  image,
-}: {
-  name: string
-  image: string | undefined
-}) {
+export async function updateProfileAction({ name, image }: { name: string; image: string | undefined }) {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -45,13 +39,7 @@ export async function revokeSessionAction(token: string) {
 }
 
 // lib/actions/account.actions.ts
-export async function updatePasswordAction({
-  currentPassword,
-  newPassword,
-}: {
-  currentPassword: string
-  newPassword: string
-}) {
+export async function updatePasswordAction({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })

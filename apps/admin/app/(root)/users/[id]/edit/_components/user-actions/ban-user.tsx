@@ -1,13 +1,6 @@
 "use client"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@bs42/ui/components/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@bs42/ui/components/dialog"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useTransition } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -36,9 +29,7 @@ const BanUser = ({ user }: { user: User }) => {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof banUserFormSchema>> = async (
-    values
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof banUserFormSchema>> = async (values) => {
     startTransition(async () => {
       const response = await banUserAction({
         userId: values.userId,
@@ -55,10 +46,10 @@ const BanUser = ({ user }: { user: User }) => {
       startTransition(() => {
         setIsOpen(false)
         form.reset()
-        router.push(`/users/${user.id}/edit`)
         toast.success("Operation success", {
           description: "User has been banned.",
         })
+        router.push(`/users/${user.id}/edit`)
       })
     })
   }
@@ -66,11 +57,7 @@ const BanUser = ({ user }: { user: User }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          className="w-full text-red-500 hover:bg-red-50 hover:text-red-700"
-          variant={"outline"}
-        >
+        <Button type="button" className="w-full text-red-500 hover:bg-red-50 hover:text-red-700" variant={"outline"}>
           <ShieldX className="size-5" />
           Ban User
         </Button>
@@ -78,37 +65,19 @@ const BanUser = ({ user }: { user: User }) => {
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Ban User</DialogTitle>
-          <DialogDescription>
-            Ban user account either temporarily or permanently.
-          </DialogDescription>
+          <DialogDescription>Ban user account either temporarily or permanently.</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <DateField
-                control={form.control}
-                name="banExpiresIn"
-                label="Ban Expiration"
-                disabled={isPending}
-                disabledDates={(date) => date < new Date()}
-              />
+              <DateField control={form.control} name="banExpiresIn" label="Ban Expiration" disabled={isPending} disabledDates={(date) => date < new Date()} />
             </div>
 
             <div className="col-span-2">
-              <TextAreaField
-                control={form.control}
-                label="Ban Reason"
-                name="banReason"
-                disabled={isPending}
-              />
+              <TextAreaField control={form.control} label="Ban Reason" name="banReason" disabled={isPending} />
             </div>
             <div className="col-span-2">
-              <Button
-                className="w-full"
-                type="button"
-                onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={isPending}
-              >
+              <Button className="w-full" type="button" onClick={() => form.handleSubmit(onSubmit)()} disabled={isPending}>
                 {isPending ? <Spinner /> : "Proceed"}
               </Button>
             </div>

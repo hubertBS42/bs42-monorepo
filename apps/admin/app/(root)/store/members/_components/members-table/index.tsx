@@ -21,9 +21,7 @@ const MembersTable = ({ data }: MembersTableProps) => {
         pageSize: data.pageSize,
         totalPages: data.totalPages,
       }}
-      onRowClick={(member) =>
-        router.push(`/store/members/${member.id}/details`)
-      }
+      onRowClick={(member) => router.push(`/store/members/${member.id}/details`)}
     />
   )
 }

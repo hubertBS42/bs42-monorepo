@@ -3,21 +3,10 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@bs42/ui/components/avatar"
 import { Badge } from "@bs42/ui/components/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Button } from "@bs42/ui/components/button"
 import { abbreviateName, capitalizeFirstLetter } from "@bs42/utils"
-import {
-  UserIcon,
-  KeyRoundIcon,
-  MonitorIcon,
-  ArrowRightIcon,
-} from "lucide-react"
+import { UserIcon, KeyRoundIcon, MonitorIcon, ArrowRightIcon } from "lucide-react"
 import Link from "next/link"
 
 const overviewLinks = [
@@ -54,16 +43,12 @@ const AccountPage = async () => {
         <CardContent className="flex items-center gap-4 pt-6">
           <Avatar className="size-16">
             <AvatarImage src={user.image ?? undefined} />
-            <AvatarFallback className="text-lg">
-              {abbreviateName(user.name)}
-            </AvatarFallback>
+            <AvatarFallback className="text-lg">{abbreviateName(user.name)}</AvatarFallback>
           </Avatar>
           <div className="grid gap-1">
             <div className="flex items-center gap-2">
               <p className="text-lg font-semibold">{user.name}</p>
-              <Badge variant="outline">
-                {capitalizeFirstLetter(user.role ?? "user")}
-              </Badge>
+              <Badge variant="outline">{capitalizeFirstLetter(user.role ?? "user")}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
@@ -75,10 +60,7 @@ const AccountPage = async () => {
         {overviewLinks.map((link) => {
           const Icon = link.icon
           return (
-            <Card
-              key={link.href}
-              className="transition-colors hover:bg-accent/50"
-            >
+            <Card key={link.href} className="transition-colors hover:bg-accent/50">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">

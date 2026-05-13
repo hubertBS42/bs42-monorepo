@@ -7,8 +7,7 @@ import { Store } from "@/types"
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers })
-    if (!session)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const { role } = session.user
     const isPlatformStaff = role === "superAdmin" || role === "admin"

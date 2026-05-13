@@ -1,14 +1,13 @@
 "server-only"
-import { Store, StoresData, StoresFilters } from "@/types"
+import { Store, StoreForSelect, StoresData, StoresFilters } from "@/types"
 import { formatError } from "@bs42/auth/server"
 import { auth } from "../auth"
 import { headers } from "next/headers"
 import { prisma } from "@bs42/db"
 import { DataResponse } from "@bs42/types"
+import { isUUID } from "validator"
 
-export const fetchStores = async (
-  filters: StoresFilters = {}
-): Promise<DataResponse<StoresData>> => {
+export const getStores = async (filters: StoresFilters = {}): Promise<DataResponse<StoresData>> => {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }
@@ -19,9 +18,7 @@ export const fetchStores = async (
     const isSystemAdmin = role === "superAdmin" || role === "admin"
 
     const where = {
-      ...(isSystemAdmin
-        ? { slug: { not: "global" } }
-        : { members: { some: { userId: session.user.id } } }),
+      ...(isSystemAdmin ? { slug: { not: "global" } } : { members: { some: { userId: session.user.id } } }),
       ...(name && { name: { contains: name, mode: "insensitive" as const } }),
     }
 
@@ -52,17 +49,25 @@ export const fetchStores = async (
   }
 }
 
-export const getStoreById = async (
-  storeId: string
-): Promise<DataResponse<Store | null>> => {
+export const getStoresForSelect = async (): Promise<DataResponse<StoreForSelect[]>> => {
   try {
-    const session = await auth.api.getSession({ headers: await headers() })
-    if (!session) return { success: false, error: "Unauthorized" }
+    const stores = await prisma.organization.findMany({
+      where: { slug: { not: "global" } },
+      select: { id: true, name: true },
+    })
 
-    const { role } = session.user
-    const isSystemAdmin = role === "superAdmin" || role === "admin"
+    return {
+      success: true,
+      data: stores,
+    }
+  } catch (error) {
+    return { success: false, error: formatError(error) }
+  }
+}
 
-    if (!isSystemAdmin) return { success: false, error: "Forbidden" }
+export const getStoreById = async (storeId: string): Promise<DataResponse<Store>> => {
+  try {
+    if (!storeId || !isUUID(storeId)) return { success: false, error: "Missing or invalid store ID." }
 
     const store = await prisma.organization.findUnique({
       where: { id: storeId },

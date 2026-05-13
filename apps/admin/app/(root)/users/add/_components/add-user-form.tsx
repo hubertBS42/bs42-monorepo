@@ -2,18 +2,12 @@
 
 import InputField from "@bs42/ui/components/input-field"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { generatePassword } from "@/lib/utils"
 import { addUserFormSchema } from "@/lib/zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useTransition } from "react"
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "@bs42/ui/components/sonner"
 import { z } from "zod"
@@ -24,20 +18,13 @@ import { createUserAction } from "@/lib/actions/user.actions"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { capitalizeFirstLetter } from "@bs42/utils"
-import { Store } from "@/types"
+import { StoreForSelect } from "@/types"
+import ImageField from "@bs42/ui/components/image-field"
+import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 
-const systemRoleOptions = SYSTEM_ROLE_NAMES.filter(
-  (item) => item !== "superAdmin"
-).map((role) => ({ label: capitalizeFirstLetter(role), value: role }))
-const storeRoleOptions = STORE_ROLE_NAMES.filter(
-  (item) => item !== "owner"
-).map((role) => ({ label: capitalizeFirstLetter(role), value: role }))
-
-const AddUserForm = () => {
+const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [stores, setStores] = useState<Store[]>([])
-  const [isStoresLoading, setIsStoresLoading] = useState(false)
 
   const form = useForm<z.infer<typeof addUserFormSchema>>({
     resolver: zodResolver(addUserFormSchema),
@@ -59,42 +46,22 @@ const AddUserForm = () => {
   const selectedRole = form.watch("systemRole")
   const isStoreUser = selectedRole === "user"
 
-  // Set first org default after fetch
   useEffect(() => {
     if (!isStoreUser) return
+    if (!stores.length) return
 
-    const fetchStores = async () => {
-      setIsStoresLoading(true)
-      try {
-        const response = await fetch("/api/stores")
-        const data: Store[] = await response.json()
-        const filtered = data.filter((org) => org.slug !== "global")
-        setStores(filtered)
-        if (filtered.length) {
-          form.setValue("stores", [
-            { storeId: filtered[0]?.id ?? "", storeRole: "member" },
-          ])
-        }
-      } catch (error) {
-        console.error("Failed to fetch stores:", error)
-      } finally {
-        setIsStoresLoading(false)
-      }
+    const currentStores = form.getValues("stores")
+    if (currentStores.length === 0) {
+      form.setValue("stores", [{ storeId: stores[0]?.id ?? "", storeRole: "member" }])
     }
+  }, [form, isStoreUser, stores])
 
-    fetchStores()
-  }, [isStoreUser, form])
+  const systemRoleOptions = SYSTEM_ROLE_NAMES.filter((item) => item !== "superAdmin").map((role) => ({ label: capitalizeFirstLetter(role), value: role }))
+  const storeRoleOptions = STORE_ROLE_NAMES.filter((item) => item !== "owner").map((role) => ({ label: capitalizeFirstLetter(role), value: role }))
 
-  const storeOptions = stores.map((store) => ({
-    label: store.name,
-    value: store.id,
-  }))
-
-  const onSubmit: SubmitHandler<z.infer<typeof addUserFormSchema>> = async (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof addUserFormSchema>> = async (data) => {
     startTransition(async () => {
-      const result = await createUserAction({
+      const response = await createUserAction({
         name: data.name,
         email: data.email,
         password: generatePassword({ passwordLength: 16 }),
@@ -103,21 +70,38 @@ const AddUserForm = () => {
         stores: data.systemRole === "user" ? data.stores : undefined,
       })
 
-      if (result.error) {
-        if (result.error === "User already exists. Use another email.") {
+      if (!response.success) {
+        if (response.error === "User already exists. Use another email.") {
           form.setError("email", {
             type: "custom",
             message: "This email address is already registered to a user",
           })
         } else {
-          toast.error("Failed to create user", { description: result.error })
+          toast.error("Failed to create user", { description: response.error })
         }
+      } else {
+        toast.success("User account was successfully created.")
+        router.push("/users")
       }
     })
   }
 
+  const handleAddAvatar = async (data: FileList) => {
+    const formData = new FormData()
+    Array.from(data).forEach((file) => formData.append("files", file))
+    return uploadImagesAction(formData)
+  }
+
+  const handleRemoveAvatar = async (url: string) => {
+    await deleteFilesAction([url])
+  }
+
   const handleDiscard = async () => {
-    router.push("/users")
+    startTransition(async () => {
+      const image = form.getValues("image")
+      if (image?.trim()) await deleteFilesAction([image])
+      router.push("/users")
+    })
   }
 
   return (
@@ -137,47 +121,31 @@ const AddUserForm = () => {
             <Card>
               <CardHeader>
                 <CardTitle>User Details</CardTitle>
-                <CardDescription>
-                  Basic information about the user.
-                </CardDescription>
+                <CardDescription>Basic information about the user.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-5">
                 <div className="col-span-2 grid">
-                  <InputField
-                    control={form.control}
-                    label="Full Name"
-                    name="name"
-                    disabled={isPending}
-                    autoFocus
-                  />
-                </div>
-                <div className="col-span-2 grid lg:col-span-1">
-                  <InputField
-                    control={form.control}
-                    label="Email"
-                    name="email"
-                    type="email"
-                    disabled={isPending}
-                  />
-                </div>
-                <div className="col-span-2 grid lg:col-span-1">
-                  <SelectField
-                    control={form.control}
-                    label="System Role"
-                    name="systemRole"
-                    options={systemRoleOptions}
-                    disabled={isPending}
-                    loadingPlaceholder="Admin"
-                  />
-                </div>
-
-                <div className="col-span-2 grid">
-                  <InputField
+                  <ImageField
                     control={form.control}
                     name="image"
-                    label="Avatar URL"
+                    sizeLimit={100}
+                    maxImages={1}
+                    onAdd={handleAddAvatar}
+                    onRemove={handleRemoveAvatar}
+                    clearErrors={form.clearErrors}
+                    label="Avatar"
                     disabled={isPending}
+                    className="max-w-25"
                   />
+                </div>
+                <div className="col-span-2 grid">
+                  <InputField control={form.control} label="Full Name" name="name" disabled={isPending} autoFocus />
+                </div>
+                <div className="col-span-2 grid lg:col-span-1">
+                  <InputField control={form.control} label="Email" name="email" type="email" disabled={isPending} />
+                </div>
+                <div className="col-span-2 grid lg:col-span-1">
+                  <SelectField control={form.control} label="System Role" name="systemRole" options={systemRoleOptions} disabled={isPending} loadingPlaceholder="Admin" />
                 </div>
               </CardContent>
             </Card>
@@ -186,60 +154,50 @@ const AddUserForm = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Store</CardTitle>
-                  <CardDescription>
-                    Assign this user to one or more stores.
-                  </CardDescription>
+                  <CardDescription>Assign this user to one or more stores.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
-                  {fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="grid grid-cols-2 items-end gap-4"
-                    >
-                      <SelectField
-                        control={form.control}
-                        label="Store"
-                        name={`stores.${index}.storeId`}
-                        options={storeOptions}
-                        disabled={isPending || isStoresLoading}
-                        loadingPlaceholder="Select store"
-                      />
-                      <div className="flex items-end gap-2">
-                        <div className="flex-1">
-                          <SelectField
-                            control={form.control}
-                            label="Member Role"
-                            name={`stores.${index}.storeRole`}
-                            options={storeRoleOptions}
-                            disabled={isPending}
-                            loadingPlaceholder="Member"
-                          />
+                  {fields.map((field, index) => {
+                    const availableStoreOptions = stores
+                      .filter((store) => !fields.some((_, i) => i !== index && form.getValues(`stores.${i}.storeId`) === store.id))
+                      .map((store) => ({ label: store.name, value: store.id }))
+
+                    return (
+                      <div key={field.id} className="grid grid-cols-2 items-end gap-4">
+                        <SelectField
+                          control={form.control}
+                          label="Store"
+                          name={`stores.${index}.storeId`}
+                          options={availableStoreOptions}
+                          disabled={isPending}
+                          loadingPlaceholder="Select store"
+                        />
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <SelectField
+                              control={form.control}
+                              label="Member Role"
+                              name={`stores.${index}.storeRole`}
+                              options={storeRoleOptions}
+                              disabled={isPending}
+                              loadingPlaceholder="Member"
+                            />
+                          </div>
+                          {fields.length > 1 && (
+                            <Button type="button" variant={"outline"} size={"icon"} onClick={() => remove(index)} disabled={isPending} className="mb-0.5">
+                              <Trash2 className="size-4" />
+                            </Button>
+                          )}
                         </div>
-                        {fields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant={"outline"}
-                            size={"icon"}
-                            onClick={() => remove(index)}
-                            disabled={isPending}
-                            className="mb-0.5"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => append({ storeId: "", storeRole: "member" })}
-                    disabled={
-                      isPending ||
-                      isStoresLoading ||
-                      storeOptions.length === fields.length
-                    }
+                    onClick={() => append({ storeId: stores.find((store) => !fields.map((f) => f.storeId).includes(store.id))?.id ?? "", storeRole: "member" })}
+                    disabled={isPending || fields.length >= stores.length}
                     className="w-full"
                   >
                     <Plus className="size-4" />
@@ -250,12 +208,7 @@ const AddUserForm = () => {
             )}
           </div>
 
-          <ResourceFormFooter
-            backTo="/users"
-            isPending={isPending}
-            isDirty={form.formState.isDirty}
-            handleDiscard={handleDiscard}
-          />
+          <ResourceFormFooter backTo="/users" isPending={isPending} isDirty={form.formState.isDirty} handleDiscard={handleDiscard} />
         </div>
       </div>
     </form>

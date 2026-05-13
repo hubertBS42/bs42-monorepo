@@ -29,8 +29,7 @@ export function useStoreSwitcher(): UseStoreSwitcherReturn {
 
       window.location.href = "/"
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "An unknown error occurred"
+      const message = error instanceof Error ? error.message : "An unknown error occurred"
       toast.error("Failed to switch store", { description: message })
       setIsSwitching(false)
     }

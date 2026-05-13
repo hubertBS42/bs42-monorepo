@@ -18,19 +18,24 @@ import { User } from "@bs42/db/client"
 import { Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
+import { useRouter } from "next/navigation"
 
 const DeleteUser = ({ user }: { user: User }) => {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
 
   const handleDelete = () => {
     startTransition(async () => {
       const response = await deleteUserAction(user)
 
-      if (response.error) {
+      if (!response.success) {
         setIsOpen(false)
         toast.error(response.error)
         return
+      } else {
+        toast.success("User account is deleted.")
+        router.push("/users")
       }
     })
   }

@@ -5,20 +5,10 @@ import { StoreRole, SystemRole } from "@bs42/auth"
 import { formatError } from "@bs42/auth/server"
 import { prisma } from "@bs42/db"
 import { User } from "@bs42/db/client"
-import {
-  addStoreMemberAction,
-  removeStoreMemberAction,
-  updateStoreMemberRoleAction,
-} from "./member.actions"
-import { redirect } from "next/navigation"
+import { addStoreMemberAction, removeStoreMemberAction, updateStoreMemberRoleAction } from "./member.actions"
+import { ActionResponse } from "@bs42/types"
 
-async function addUserToAllStores({
-  userId,
-  systemRole,
-}: {
-  userId: string
-  systemRole: SystemRole
-}) {
+async function addUserToAllStoresAction({ userId, systemRole }: { userId: string; systemRole: SystemRole }): Promise<ActionResponse> {
   try {
     const stores = await prisma.organization.findMany({
       select: { id: true, name: true },
@@ -53,7 +43,7 @@ export async function createUserAction({
   password: string
   systemRole: SystemRole
   stores?: { storeId: string; storeRole: StoreRole }[]
-}) {
+}): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -92,13 +82,12 @@ export async function createUserAction({
     }
 
     if (systemRole === "superAdmin" || systemRole === "admin") {
-      await addUserToAllStores({ userId: newUser.user.id, systemRole })
+      await addUserToAllStoresAction({ userId: newUser.user.id, systemRole })
     }
+    return { success: true }
   } catch (error) {
     return { success: false, error: formatError(error) }
   }
-
-  redirect("/users?success=User+added+successfully")
 }
 
 async function updateOrgMembershipsAction({
@@ -116,7 +105,7 @@ async function updateOrgMembershipsAction({
   }[]
   removedMembers: { memberId: string; storeId: string }[]
   session: Session
-}) {
+}): Promise<ActionResponse> {
   try {
     await Promise.all([
       // Add new memberships
@@ -148,9 +137,7 @@ async function updateOrgMembershipsAction({
         }),
 
       // Remove deleted memberships
-      ...removedMembers.map(async ({ memberId, storeId }) =>
-        removeStoreMemberAction({ memberId, storeId, session })
-      ),
+      ...removedMembers.map(async ({ memberId, storeId }) => removeStoreMemberAction({ memberId, storeId, session })),
     ])
 
     return { success: true }
@@ -178,7 +165,7 @@ export async function updateUserAction({
     isNew: boolean
   }[]
   removedMembers?: { memberId: string; storeId: string }[]
-}) {
+}): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -212,11 +199,7 @@ export async function updateUserAction({
   }
 }
 
-export async function banUserAction(data: {
-  userId: string
-  banReason: string | null
-  banExpiresIn: Date | null
-}) {
+export async function banUserAction(data: { userId: string; banReason: string | null; banExpiresIn: Date | null }): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -249,7 +232,7 @@ export async function banUserAction(data: {
   }
 }
 
-export async function unbanUserAction(userId: string) {
+export async function unbanUserAction(userId: string): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -273,7 +256,7 @@ export async function unbanUserAction(userId: string) {
   }
 }
 
-export async function deleteUserAction(user: User) {
+export async function deleteUserAction(user: User): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
     const session = await auth.api.getSession({ headers: headersObj })
@@ -289,23 +272,13 @@ export async function deleteUserAction(user: User) {
       body: { userId: user.id },
       headers: headersObj,
     })
+    return { success: true }
   } catch (error) {
     return { success: false, error: formatError(error) }
   }
-  redirect("/users?success=User+deleted+successfully")
 }
 
-export async function userSignUpAction({
-  name,
-  email,
-  password,
-  callbackURL,
-}: {
-  name: string
-  email: string
-  password: string
-  callbackURL: string
-}) {
+export async function userSignUpAction({ name, email, password, callbackURL }: { name: string; email: string; password: string; callbackURL: string }): Promise<ActionResponse> {
   try {
     await auth.api.signUpEmail({
       body: {
@@ -323,15 +296,7 @@ export async function userSignUpAction({
   }
 }
 
-export async function requestPasswordResetAction({
-  email,
-  redirectTo,
-  actor,
-}: {
-  email: string
-  redirectTo: string
-  actor: "self" | "admin"
-}) {
+export async function requestPasswordResetAction({ email, redirectTo, actor }: { email: string; redirectTo: string; actor: "self" | "admin" }): Promise<ActionResponse> {
   try {
     const headersObj = await headers()
 

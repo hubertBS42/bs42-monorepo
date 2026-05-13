@@ -56,25 +56,9 @@ const UpdateProfileForm = ({ user }: UpdateProfileFormProps) => {
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <div className="grid gap-6">
         <FieldGroup>
-          <InputField
-            control={form.control}
-            name="name"
-            label="Name"
-            disabled={isPending}
-          />
-          <InputField
-            control={form.control}
-            name="email"
-            label="Email"
-            type="email"
-            disabled
-          />
-          <InputField
-            control={form.control}
-            name="image"
-            label="Avatar URL"
-            disabled={isPending}
-          />
+          <InputField control={form.control} name="name" label="Name" disabled={isPending} />
+          <InputField control={form.control} name="email" label="Email" type="email" disabled />
+          <InputField control={form.control} name="image" label="Avatar URL" disabled={isPending} />
         </FieldGroup>
         <div className="flex justify-end">
           <Button type="submit" disabled={isPending || !form.formState.isDirty}>

@@ -24,9 +24,7 @@ const UpdatePasswordForm = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof updatePasswordFormSchema>> = (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof updatePasswordFormSchema>> = (data) => {
     startTransition(async () => {
       const result = await updatePasswordAction({
         currentPassword: data.currentPassword,
@@ -56,27 +54,9 @@ const UpdatePasswordForm = () => {
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <div className="grid gap-6">
         <FieldGroup>
-          <InputField
-            control={form.control}
-            name="currentPassword"
-            label="Current Password"
-            type="password"
-            disabled={isPending}
-          />
-          <InputField
-            control={form.control}
-            name="newPassword"
-            label="New Password"
-            type="password"
-            disabled={isPending}
-          />
-          <InputField
-            control={form.control}
-            name="confirmPassword"
-            label="Confirm New Password"
-            type="password"
-            disabled={isPending}
-          />
+          <InputField control={form.control} name="currentPassword" label="Current Password" type="password" disabled={isPending} />
+          <InputField control={form.control} name="newPassword" label="New Password" type="password" disabled={isPending} />
+          <InputField control={form.control} name="confirmPassword" label="Confirm New Password" type="password" disabled={isPending} />
         </FieldGroup>
         <div className="flex justify-end">
           <Button type="submit" disabled={isPending || !form.formState.isDirty}>

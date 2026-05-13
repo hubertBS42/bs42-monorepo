@@ -3,19 +3,13 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import RemovedFromStore from "./_components/removed-from-store"
 import { prisma } from "@bs42/db"
-import SuccessToast from "@bs42/ui/components/success-toast"
 import { Metadata } from "next"
-
-interface RemovedFromStorePage {
-  searchParams: Promise<{ success?: string }>
-}
 
 export const metadata: Metadata = {
   title: "Removed From Store",
 }
 
-const RemovedFromStorePage = async ({ searchParams }: RemovedFromStorePage) => {
-  const { success } = await searchParams
+const RemovedFromStorePage = async () => {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/sign-in")
 
@@ -25,12 +19,7 @@ const RemovedFromStorePage = async ({ searchParams }: RemovedFromStorePage) => {
     include: { organization: true },
   })
 
-  return (
-    <>
-      {success && <SuccessToast message={decodeURIComponent(success)} />}
-      <RemovedFromStore memberships={memberships} />
-    </>
-  )
+  return <RemovedFromStore memberships={memberships} />
 }
 
 export default RemovedFromStorePage

@@ -1,8 +1,7 @@
 import { Metadata } from "next"
 import EditStoreForm from "./_components/edit-store-form"
 import { getStoreById } from "@/lib/data/stores.data"
-import { Suspense } from "react"
-import Loader from "@/components/loader"
+import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Edit Store",
@@ -14,12 +13,13 @@ type Props = {
 
 const EditStorePage = async ({ params }: Props) => {
   const { id } = await params
-  const data = getStoreById(id)
-  return (
-    <Suspense fallback={<Loader />}>
-      <EditStoreForm data={data} />
-    </Suspense>
-  )
+  const response = await getStoreById(id)
+
+  if (!response.success) {
+    if (response.error === "Store not found") notFound()
+    throw new Error(response.error)
+  }
+  return <EditStoreForm store={response.data} />
 }
 
 export default EditStorePage

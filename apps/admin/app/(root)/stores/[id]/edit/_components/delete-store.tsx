@@ -12,7 +12,6 @@ import {
   AlertDialogTrigger,
 } from "@bs42/ui/components/alert-dialog"
 import { Button } from "@bs42/ui/components/button"
-import { Skeleton } from "@bs42/ui/components/skeleton"
 import { Spinner } from "@bs42/ui/components/spinner"
 import { authClient } from "@/lib/auth-client"
 import { StoreRole } from "@bs42/auth"
@@ -20,16 +19,18 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
 import { Store } from "@/types"
+import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 
 const DeleteStore = ({ store }: { store: Store }) => {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
-  const { data, isPending: isActiveMemberRoleLoading } =
-    authClient.useActiveMemberRole()
+  const { data, isPending: activeMemberRoleIsLoading } = authClient.useActiveMemberRole()
+
+  if (activeMemberRoleIsLoading || !data) return <ButtonSkeleton />
 
   const canDelete = authClient.organization.checkRolePermission({
-    role: (data?.role ?? "member") as StoreRole,
+    role: (data.role ?? "member") as StoreRole,
     permissions: {
       organization: ["delete"],
     },
@@ -45,8 +46,8 @@ const DeleteStore = ({ store }: { store: Store }) => {
           onSuccess: () => {
             startTransition(() => {
               setIsOpen(false)
-              router.push("/stores")
               toast.success("Store has been deleted.")
+              router.push("/stores")
             })
           },
           onError: (ctx) => {
@@ -60,17 +61,11 @@ const DeleteStore = ({ store }: { store: Store }) => {
     })
   }
 
-  if (isActiveMemberRoleLoading) return <Skeleton className="h-9 rounded-md" />
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          className="w-full"
-          variant={"destructive"}
-          disabled={!canDelete}
-        >
-          Delete store
+        <Button type="button" className="w-full" variant={"destructive"} disabled={!canDelete}>
+          Delete Store
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

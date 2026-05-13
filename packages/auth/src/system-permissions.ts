@@ -8,6 +8,9 @@ import {
 const statement = {
   ...defaultStatements,
   organization: ["create", "update", "delete", "switch"],
+  brand: ["create", "update", "delete"],
+  category: ["create", "update", "delete"],
+  product: ["create", "update", "delete"],
 } as const
 
 export const systemAccessController = createAccessControl(statement)
@@ -18,9 +21,16 @@ export const systemRoles = {
   }),
   admin: systemAccessController.newRole({
     ...adminAc.statements,
+    brand: ["create", "update", "delete"],
+    category: ["create", "update", "delete"],
+    product: ["create", "update", "delete"],
   }),
   superAdmin: systemAccessController.newRole({
     ...adminAc.statements,
+    organization: ["create", "update", "delete", "switch"],
+    brand: ["create", "update", "delete"],
+    category: ["create", "update", "delete"],
+    product: ["create", "update", "delete"],
   }),
 }
 

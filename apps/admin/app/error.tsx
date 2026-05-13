@@ -22,10 +22,7 @@ const ErrorPage = ({ error, reset }: ErrorPageProps) => {
         </div>
         <div className="grid gap-2">
           <h1 className="text-2xl font-bold">Something went wrong</h1>
-          <p className="text-sm text-muted-foreground">
-            An unexpected error occurred. Please try again or contact support if
-            the problem persists.
-          </p>
+          <p className="text-sm text-muted-foreground">An unexpected error occurred. Please try again or contact support if the problem persists.</p>
           {error.digest && (
             <p className="text-xs text-muted-foreground">
               Error ID: <span className="font-mono">{error.digest}</span>
@@ -33,10 +30,7 @@ const ErrorPage = ({ error, reset }: ErrorPageProps) => {
           )}
         </div>
         <div className="flex justify-center gap-3">
-          <Button
-            variant="outline"
-            onClick={() => (window.location.href = "/")}
-          >
+          <Button variant="outline" onClick={() => (window.location.href = "/")}>
             Go Home
           </Button>
           <Button onClick={reset}>Try Again</Button>

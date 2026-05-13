@@ -12,22 +12,22 @@ import {
   AlertDialogTrigger,
 } from "@bs42/ui/components/alert-dialog"
 import { Button } from "@bs42/ui/components/button"
-import { Skeleton } from "@bs42/ui/components/skeleton"
 import { Spinner } from "@bs42/ui/components/spinner"
 import { leaveStoreAction } from "@/lib/actions/member.actions"
 import { authClient } from "@/lib/auth-client"
 import { DoorOpen } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
+import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
+import { useRouter } from "next/navigation"
 
 const LeaveStore = () => {
   const [isPending, startTransition] = useTransition()
-  const { data: activeStore, isPending: isActiveStorePending } =
-    authClient.useActiveOrganization()
+  const { data: activeStore, isPending: isActiveStorePending } = authClient.useActiveOrganization()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
 
-  if (isActiveStorePending || !activeStore)
-    return <Skeleton className="h-9 w-full" />
+  if (isActiveStorePending || !activeStore) return <ButtonSkeleton />
 
   const handleLeave = () => {
     startTransition(async () => {
@@ -36,7 +36,9 @@ const LeaveStore = () => {
       if (!response.success) {
         setIsOpen(false)
         toast.error("Operation failed", { description: response.error })
-        return
+      } else {
+        router.push("/removed-from-organization")
+        toast.success(`You are no longer a member of ${activeStore.name}`)
       }
     })
   }

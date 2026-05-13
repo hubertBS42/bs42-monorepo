@@ -4,13 +4,7 @@ import { ChevronLeft } from "lucide-react"
 import { Button } from "@bs42/ui/components/button"
 import Link from "next/link"
 
-const BackButton = ({
-  isLoading,
-  link,
-}: {
-  isLoading?: boolean
-  link: string
-}) => {
+const BackButton = ({ isLoading, link }: { isLoading?: boolean; link: string }) => {
   return (
     <Button variant={"outline"} size={"sm"} disabled={isLoading} asChild>
       <Link href={link}>

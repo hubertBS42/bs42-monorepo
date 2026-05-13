@@ -1,15 +1,9 @@
 "use client"
 
 import { Badge } from "@bs42/ui/components/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@bs42/ui/components/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@bs42/ui/components/select"
 import { Skeleton } from "@bs42/ui/components/skeleton"
-import { MemberWithUser } from "@/types"
+import { MemberForTable } from "@/types"
 import { updateStoreMemberRoleAction } from "@/lib/actions/member.actions"
 import { authClient } from "@/lib/auth-client"
 import { STORE_ROLE_NAMES, StoreRole } from "@bs42/auth"
@@ -24,19 +18,18 @@ export const RollCellSkeleton = () => {
 
 const genRoleBadge = (role: StoreRole) => {
   const roleConfig = {
-    owner: { variant: "default" as const, className: "" },
-    admin: { variant: "secondary" as const, className: "" },
-    member: { variant: "outline" as const, className: "" },
+    owner: { variant: "owner" as const, className: "" },
+    admin: { variant: "admin" as const, className: "" },
+    member: { variant: "user" as const, className: "" },
   }
 
   const config = roleConfig[role] || roleConfig.member
   return <Badge variant={config.variant}>{capitalizeFirstLetter(role)}</Badge>
 }
 
-const RoleCell = ({ member }: { member: MemberWithUser }) => {
+const RoleCell = ({ member }: { member: MemberForTable }) => {
   const [isPending, startTransition] = useTransition()
-  const { data: activeOrganization, isPending: isActiveOrgLoading } =
-    authClient.useActiveOrganization()
+  const { data: activeOrganization, isPending: isActiveOrgLoading } = authClient.useActiveOrganization()
   const { data: session, isPending: isSessionLoading } = authClient.useSession()
   const router = useRouter()
 
@@ -44,9 +37,7 @@ const RoleCell = ({ member }: { member: MemberWithUser }) => {
     return <RollCellSkeleton />
   }
 
-  const currentMember = activeOrganization?.members?.find(
-    (m) => m.userId === session?.user.id
-  )
+  const currentMember = activeOrganization?.members?.find((m) => m.userId === session?.user.id)
 
   const canSetRole = authClient.organization.checkRolePermission({
     role: (currentMember?.role ?? "member") as StoreRole,
@@ -82,11 +73,7 @@ const RoleCell = ({ member }: { member: MemberWithUser }) => {
   }
 
   return (
-    <Select
-      defaultValue={member.role}
-      onValueChange={handleRoleChange}
-      disabled={isPending}
-    >
+    <Select defaultValue={member.role} onValueChange={handleRoleChange} disabled={isPending}>
       <SelectTrigger className="h-8 w-32" size="sm">
         <SelectValue />
       </SelectTrigger>

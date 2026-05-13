@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import dynamic from "next/dynamic"
 import { Checkbox } from "@bs42/ui/components/checkbox"
 import { format } from "date-fns"
-import { MemberWithUser } from "@/types"
+import { MemberForTable } from "@/types"
 import { RollCellSkeleton } from "./role-cell"
 import ColumnHeader from "@/components/data-table/column-header"
 
@@ -11,26 +11,17 @@ const RoleCell = dynamic(() => import("./role-cell"), {
   loading: () => <RollCellSkeleton />,
 })
 
-export const columns: ColumnDef<MemberWithUser>[] = [
+export const columns: ColumnDef<MemberForTable>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
     enableSorting: false,
     enableHiding: false,
   },

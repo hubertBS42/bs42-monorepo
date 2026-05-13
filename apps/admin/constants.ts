@@ -1,13 +1,12 @@
 import StaticLogo from "@/public/images/logo.png"
 import { BreadcrumbConfig } from "./types"
-import { StorePlan, StoreStatus } from "@/types"
+import { StoreStatus } from "@/types"
 import { capitalizeFirstLetter } from "@bs42/utils"
+import { Condition, Status } from "@bs42/db/enums"
 
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "BS42.NET"
-export const APP_DESCRIPTION =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-export const APP_URL =
-  process.env.NEXT_PUBLIC_ADMIN_SERVER_URL || "http://localhost:3000"
+export const APP_DESCRIPTION = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+export const APP_URL = process.env.NEXT_PUBLIC_ADMIN_SERVER_URL || "http://localhost:3000"
 export const APP_LOGO = {
   static: StaticLogo,
   url: `${APP_URL}/images/logo.png`,
@@ -173,28 +172,58 @@ export const BREADCRUMB_DATA: BreadcrumbConfig[] = [
     pathname: "/store",
     segments: [
       { text: "Dashboard", href: "/" },
-      { text: "Store Overview", href: "#" },
+      { text: "Store", href: "#" },
     ],
   },
   {
-    pathname: "/store/logs",
+    pathname: "/store/listings",
     segments: [
       { text: "Dashboard", href: "/" },
-      { text: "Store Logs", href: "#" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Listings", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/listings/add",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Listings", href: "/store/listings" },
+      { text: "Add Listing", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/listings/[id]/edit",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Listings", href: "/store/listings" },
+      { text: "Edit Listing", href: "#" },
     ],
   },
   {
     pathname: "/store/members",
     segments: [
       { text: "Dashboard", href: "/" },
-      { text: "Store Members", href: "#" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Members", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/members/[id]/details",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Members", href: "/store/members" },
+      { text: "Member Details", href: "#" },
     ],
   },
   {
     pathname: "/store/invitations",
     segments: [
       { text: "Dashboard", href: "/" },
-      { text: "Store Invitations", href: "#" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Invitations", href: "#" },
     ],
   },
   {
@@ -238,20 +267,29 @@ export const BREADCRUMB_DATA: BreadcrumbConfig[] = [
 ]
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 30, 40, 50]
-export const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]
 
 export const STORE_STATUS_OPTIONS = Object.values(StoreStatus).map((value) => ({
   label: capitalizeFirstLetter(value),
   value,
 }))
 
-export const STORE_PLAN_OPTIONS = Object.values(StorePlan).map((value) => ({
+export const BRAND_STATUS_OPTIONS = Object.values(Status).map((value) => ({
   label: capitalizeFirstLetter(value),
+  value,
+}))
+
+export const CATEGORY_STATUS_OPTIONS = Object.values(Status).map((value) => ({
+  label: capitalizeFirstLetter(value),
+  value,
+}))
+
+export const PRODUCT_STATUS_OPTIONS = Object.values(Status).map((value) => ({
+  label: capitalizeFirstLetter(value),
+  value,
+}))
+
+export const CONDITION_OPTIONS = Object.values(Condition).map((value) => ({
+  label: capitalizeFirstLetter(value.replace(/_/g, " ")),
   value,
 }))

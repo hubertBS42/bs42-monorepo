@@ -13,15 +13,17 @@ import {
 } from "@bs42/ui/components/alert-dialog"
 import { Button } from "@bs42/ui/components/button"
 import { Spinner } from "@bs42/ui/components/spinner"
-import { MemberWithUserWithSessions } from "@/types"
+import { MemberDetails } from "@/types"
 import { removeStoreMemberAction } from "@/lib/actions/member.actions"
 import { BadgeMinus } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
+import { useRouter } from "next/navigation"
 
-const RemoveMember = ({ member }: { member: MemberWithUserWithSessions }) => {
+const RemoveMember = ({ member }: { member: MemberDetails }) => {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
 
   const handleRemove = () => {
     startTransition(async () => {
@@ -30,9 +32,12 @@ const RemoveMember = ({ member }: { member: MemberWithUserWithSessions }) => {
         storeId: member.organizationId,
       })
 
-      if (response.error) {
+      if (!response.success) {
         setIsOpen(false)
         toast.error("Operation failed", { description: response.error })
+      } else {
+        router.push("/store/members")
+        toast.success("Member has been removed from this store.")
       }
     })
   }

@@ -1,20 +1,5 @@
-import slugify from "slugify"
-slugify.extend({ ".": "-" })
-
-export function generatePassword(options: {
-  useSymbols?: boolean
-  useNumbers?: boolean
-  useLowerCase?: boolean
-  useUpperCase?: boolean
-  passwordLength: number
-}) {
-  const {
-    useSymbols = true,
-    useNumbers = true,
-    useLowerCase = true,
-    useUpperCase = true,
-    passwordLength,
-  } = options
+export function generatePassword(options: { useSymbols?: boolean; useNumbers?: boolean; useLowerCase?: boolean; useUpperCase?: boolean; passwordLength: number }) {
+  const { useSymbols = true, useNumbers = true, useLowerCase = true, useUpperCase = true, passwordLength } = options
 
   let charset = ""
   let newPassword = ""
@@ -31,9 +16,17 @@ export function generatePassword(options: {
   return newPassword
 }
 
-export function generateSlug(input: string): string {
-  return slugify(input, {
-    lower: true,
-    strict: true,
-  })
+export function generateSKU(productName: string, attributes: Record<string, string>): string {
+  // Extract first word of product name
+  const productPrefix = productName
+    .split(" ")[0]!
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+
+  // Extract attribute values
+  const attrValues = Object.values(attributes)
+    .map((val) => val.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+    .join("-")
+
+  return `${productPrefix}-${attrValues}`
 }

@@ -4,27 +4,14 @@ import { routePermissions } from "@/lib/access-control"
 import { SystemRole } from "@bs42/auth"
 import { prisma } from "@bs42/db"
 
-const authPaths = [
-  /^\/sign-in/,
-  /^\/sign-up/,
-  /^\/reset-password/,
-  /^\/set-password/,
-]
-const publicPaths = [
-  /^\/accept-invitation/,
-  /^\/no-stores/,
-  /^\/removed-from-store/,
-]
+const authPaths = [/^\/sign-in/, /^\/sign-up/, /^\/reset-password/, /^\/set-password/]
+const publicPaths = [/^\/accept-invitation/, /^\/no-stores/, /^\/removed-from-store/]
 
 export async function proxy(request: NextRequest) {
   const { nextUrl } = request
 
-  const isOnAuthPath = authPaths.some((pattern) =>
-    pattern.test(nextUrl.pathname)
-  )
-  const isOnPublicPath = publicPaths.some((pattern) =>
-    pattern.test(nextUrl.pathname)
-  )
+  const isOnAuthPath = authPaths.some((pattern) => pattern.test(nextUrl.pathname))
+  const isOnPublicPath = publicPaths.some((pattern) => pattern.test(nextUrl.pathname))
 
   // Allow public paths
   if (isOnPublicPath) return NextResponse.next()
@@ -43,10 +30,7 @@ export async function proxy(request: NextRequest) {
   // Redirect unauthenticated users
   if (!session && !isOnAuthPath) {
     const redirectURL = new URL("/sign-in", request.url)
-    redirectURL.searchParams.set(
-      "callbackURL",
-      nextUrl.pathname + nextUrl.search
-    )
+    redirectURL.searchParams.set("callbackURL", nextUrl.pathname + nextUrl.search)
     return NextResponse.redirect(redirectURL)
   }
 
@@ -56,8 +40,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (session) {
-    const isPlatformAdmin =
-      session.user.role === "superAdmin" || session.user.role === "admin"
+    const isPlatformAdmin = session.user.role === "superAdmin" || session.user.role === "admin"
     const isOnNoStoresPage = nextUrl.pathname === "/no-stores"
     const isOnRemovedPage = nextUrl.pathname === "/removed-from-store"
 
@@ -87,9 +70,7 @@ export async function proxy(request: NextRequest) {
         })
 
         if (!isActiveMember && !isOnRemovedPage) {
-          return NextResponse.redirect(
-            new URL("/removed-from-store", request.url)
-          )
+          return NextResponse.redirect(new URL("/removed-from-store", request.url))
         }
       }
     }
@@ -97,10 +78,7 @@ export async function proxy(request: NextRequest) {
     // Check route permissions
     const matchedRoute = Object.keys(routePermissions)
       .sort((a, b) => b.length - a.length)
-      .find(
-        (route) =>
-          nextUrl.pathname === route || nextUrl.pathname.startsWith(route + "/")
-      )
+      .find((route) => nextUrl.pathname === route || nextUrl.pathname.startsWith(route + "/"))
 
     const permission = matchedRoute ? routePermissions[matchedRoute] : null
 
@@ -120,11 +98,7 @@ export async function proxy(request: NextRequest) {
       }
 
       // Check sub-item context if path goes deeper than matched route
-      const subItem = permission.nav?.items?.find(
-        (item) =>
-          nextUrl.pathname === item.url ||
-          nextUrl.pathname.startsWith(item.url + "/")
-      )
+      const subItem = permission.nav?.items?.find((item) => nextUrl.pathname === item.url || nextUrl.pathname.startsWith(item.url + "/"))
 
       const effectiveContext = subItem?.context ?? permission.context
 

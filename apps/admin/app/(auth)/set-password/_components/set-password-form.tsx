@@ -1,13 +1,7 @@
 "use client"
 import PasswordField from "@bs42/ui/components/password-field"
 import { Button } from "@bs42/ui/components/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Field, FieldDescription, FieldGroup } from "@bs42/ui/components/field"
 import { Spinner } from "@bs42/ui/components/spinner"
 import { authClient } from "@/lib/auth-client"
@@ -18,13 +12,7 @@ import { useState, useTransition } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
-export function SetPasswordForm({
-  token,
-  action,
-}: {
-  token: string
-  action: string
-}) {
+export function SetPasswordForm({ token, action }: { token: string; action: string }) {
   const [isPending, startTransition] = useTransition()
   const [isComplete, setIsComplete] = useState(false)
 
@@ -37,9 +25,7 @@ export function SetPasswordForm({
     mode: "onChange",
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof setPasswordFormSchema>> = async (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof setPasswordFormSchema>> = async (data) => {
     startTransition(async () => {
       await authClient.resetPassword(
         {
@@ -58,8 +44,7 @@ export function SetPasswordForm({
   }
 
   function getButtonText(isPending: boolean, action: "set" | "reset") {
-    if (isPending)
-      return action === "set" ? "Setting password..." : "Resetting password..."
+    if (isPending) return action === "set" ? "Setting password..." : "Resetting password..."
     return action === "set" ? "Set password" : "Reset password"
   }
 
@@ -82,29 +67,14 @@ export function SetPasswordForm({
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-xl">{`${action === "set" ? "Set" : "Reset"} your password`}</CardTitle>
-        <CardDescription>
-          Enter your preferred password below to login
-        </CardDescription>
+        <CardDescription>Enter your preferred password below to login</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            <PasswordField
-              control={form.control}
-              name="password"
-              label="Password"
-              disabled={isPending}
-              autoFocus
-              required
-            />
+            <PasswordField control={form.control} name="password" label="Password" disabled={isPending} autoFocus required />
 
-            <PasswordField
-              control={form.control}
-              name="confirmPassword"
-              label="Confirm password"
-              disabled={isPending}
-              required
-            />
+            <PasswordField control={form.control} name="confirmPassword" label="Confirm password" disabled={isPending} required />
 
             <Field>
               <Button type="submit" disabled={isPending}>

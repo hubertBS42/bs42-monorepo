@@ -34,9 +34,7 @@ export function SignUpForm({ callbackURL, email }: SignUpFormProps) {
     mode: "onChange",
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof signUpFormSchema>> = async (
-    data
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof signUpFormSchema>> = async (data) => {
     startTransition(async () => {
       const response = await userSignUpAction({
         name: data.fullName,
@@ -60,43 +58,13 @@ export function SignUpForm({ callbackURL, email }: SignUpFormProps) {
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create an account</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            Create an account by filling out the form below
-          </p>
+          <p className="text-sm text-balance text-muted-foreground">Create an account by filling out the form below</p>
         </div>
 
-        <InputField
-          control={form.control}
-          name="fullName"
-          label="Full name"
-          placeholder="John Smith"
-          disabled={isPending}
-          required
-          autoFocus
-        />
-        <InputField
-          control={form.control}
-          name="email"
-          label="Email"
-          placeholder="johnsmith@example.com"
-          disabled={isPending || !!email}
-          type="email"
-          required
-        />
-        <PasswordField
-          control={form.control}
-          name="password"
-          label="Password"
-          disabled={isPending}
-          required
-        />
-        <PasswordField
-          control={form.control}
-          name="confirmPassword"
-          label="Confirm password"
-          disabled={isPending}
-          required
-        />
+        <InputField control={form.control} name="fullName" label="Full name" placeholder="John Smith" disabled={isPending} required autoFocus />
+        <InputField control={form.control} name="email" label="Email" placeholder="johnsmith@example.com" disabled={isPending || !!email} type="email" required />
+        <PasswordField control={form.control} name="password" label="Password" disabled={isPending} required />
+        <PasswordField control={form.control} name="confirmPassword" label="Confirm password" disabled={isPending} required />
 
         <Field>
           <Button type="submit" disabled={isPending}>

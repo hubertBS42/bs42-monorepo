@@ -5,12 +5,11 @@ import { format } from "date-fns"
 import { Badge } from "@bs42/ui/components/badge"
 import { capitalizeFirstLetter } from "@bs42/utils"
 import ColumnHeader from "@/components/data-table/column-header"
-import { Store, StorePlan, StoreStatus } from "@/types"
+import { Store, StoreStatus } from "@/types"
 
 const genStatusBadge = (status: StoreStatus) => {
   const statusConfig = {
-    ACTIVE: { variant: "default" as const, className: "" },
-    INACTIVE: { variant: "secondary" as const, className: "" },
+    ACTIVE: { variant: "success" as const, className: "" },
     SUSPENDED: { variant: "destructive" as const, className: "" },
   }
 
@@ -18,36 +17,18 @@ const genStatusBadge = (status: StoreStatus) => {
   return <Badge variant={config.variant}>{capitalizeFirstLetter(status)}</Badge>
 }
 
-const genPlanBadge = (plan: StorePlan) => {
-  const planConfig = {
-    BASIC: { variant: "default" as const, className: "" },
-    ENTERPRISE: { variant: "secondary" as const, className: "" },
-  }
-
-  const config = planConfig[plan] || planConfig.BASIC
-  return <Badge variant={config.variant}>{capitalizeFirstLetter(plan)}</Badge>
-}
-
 export const columns: ColumnDef<Store>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        onClick={(e) => e.stopPropagation()}
-      />
+      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" onClick={(e) => e.stopPropagation()} />
     ),
     enableSorting: false,
     enableHiding: false,
@@ -58,14 +39,7 @@ export const columns: ColumnDef<Store>[] = [
   },
   {
     accessorKey: "slug",
-    header: () => (
-      <ColumnHeader title="Slug" sortKey="name" enableSorting={false} />
-    ),
-  },
-  {
-    accessorKey: "plan",
-    header: () => <ColumnHeader title="Plan" sortKey="plan" />,
-    cell: ({ row }) => genPlanBadge(row.original.plan),
+    header: () => <ColumnHeader title="Slug" sortKey="name" enableSorting={false} />,
   },
   {
     accessorKey: "status",

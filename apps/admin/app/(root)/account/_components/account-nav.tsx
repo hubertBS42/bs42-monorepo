@@ -5,10 +5,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const links = [
-  { href: "/catalogue", label: "Overview" },
-  { href: "/catalogue/products", label: "Products" },
-  { href: "/catalogue/categories", label: "Categories" },
-  { href: "/catalogue/brands", label: "Brands" },
+  { href: "/account", label: "Overview" },
+  { href: "/account/profile", label: "Profile" },
+  { href: "/account/password", label: "Password" },
+  { href: "/account/sessions", label: "Sessions" },
 ]
 
 const CatalogueNav = () => {
@@ -24,9 +24,7 @@ const CatalogueNav = () => {
             href={link.href}
             className={cn(
               "-mb-px border-b-2 px-3 pb-3 text-sm font-medium transition-colors",
-              isActive
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              isActive ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             {link.label}

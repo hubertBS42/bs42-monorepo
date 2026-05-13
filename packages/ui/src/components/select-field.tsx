@@ -1,13 +1,6 @@
 "use client"
 import { Control, Controller, FieldValues, Path } from "react-hook-form"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./select"
 import { Field, FieldDescription, FieldError, FieldLabel } from "./field"
 import { ChevronDownIcon } from "lucide-react"
 import { PrimitiveOption, SelectOption } from "@bs42/types"
@@ -27,13 +20,7 @@ interface SelectFieldProps<T extends FieldValues> {
   side?: "top" | "bottom" | "left" | "right"
 }
 
-const PlaceholderComponent = ({
-  placeholderLabel,
-  placeholderText,
-}: {
-  placeholderLabel?: string
-  placeholderText?: string
-}) => {
+const PlaceholderComponent = ({ placeholderLabel, placeholderText }: { placeholderLabel?: string; placeholderText?: string }) => {
   return (
     <Field className="flex flex-col gap-1">
       {placeholderLabel && <FieldLabel>{placeholderLabel}</FieldLabel>}
@@ -45,18 +32,7 @@ const PlaceholderComponent = ({
   )
 }
 
-const SelectField = <T extends FieldValues>({
-  control,
-  name,
-  description,
-  label,
-  side,
-  size,
-  placeholder,
-  loadingPlaceholder,
-  options,
-  ...selectProps
-}: SelectFieldProps<T>) => {
+const SelectField = <T extends FieldValues>({ control, name, description, label, side, size, placeholder, loadingPlaceholder, options, ...selectProps }: SelectFieldProps<T>) => {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -65,12 +41,7 @@ const SelectField = <T extends FieldValues>({
   }, [isMounted])
 
   if (!isMounted) {
-    return (
-      <PlaceholderComponent
-        placeholderLabel={label}
-        placeholderText={loadingPlaceholder}
-      />
-    )
+    return <PlaceholderComponent placeholderLabel={label} placeholderText={loadingPlaceholder} />
   }
 
   // Normalize options
@@ -89,12 +60,8 @@ const SelectField = <T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Field className="grid gap-1" data-invalid={fieldState.invalid}>
           {label && <FieldLabel htmlFor={name}>{label}</FieldLabel>}
-          <Select
-            onValueChange={field.onChange}
-            value={field.value}
-            {...selectProps}
-          >
-            <SelectTrigger size={size} className="w-full" id={name}>
+          <Select onValueChange={field.onChange} value={field.value} {...selectProps}>
+            <SelectTrigger size={size} className="w-full" id={name} aria-invalid={fieldState.invalid}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent side={side}>

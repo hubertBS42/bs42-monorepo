@@ -5,25 +5,12 @@ import { admin, organization } from "better-auth/plugins"
 import { nextCookies } from "better-auth/next-js"
 import { systemAccessController, systemRoles } from "./system-permissions"
 import { storeAccessController, storeRoles } from "./store-permissions"
-import {
-  InviteMemberEmail,
-  PasswordUpdatedEmail,
-  ResetPasswordEmail,
-  sendEmail,
-  SetPasswordEmail,
-} from "@bs42/email"
+import { InviteMemberEmail, PasswordUpdatedEmail, ResetPasswordEmail, sendEmail, SetPasswordEmail } from "@bs42/email"
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME
-const RESET_PASSWORD_TOKEN_EXPIRATON = process.env
-  .RESET_PASSWORD_TOKEN_EXPIRATON
-  ? Number(process.env.RESET_PASSWORD_TOKEN_EXPIRATON)
-  : 1800
-const SESSION_CACHE_EXPIRATION = process.env.SESSION_CACHE_EXPIRATION
-  ? Number(process.env.SESSION_CACHE_EXPIRATION)
-  : 300
-const INVITATION_EXPIRATON = process.env.INVITATION_EXPIRATON
-  ? Number(process.env.INVITATION_EXPIRATON)
-  : 1800
+const RESET_PASSWORD_TOKEN_EXPIRATON = process.env.RESET_PASSWORD_TOKEN_EXPIRATON ? Number(process.env.RESET_PASSWORD_TOKEN_EXPIRATON) : 1800
+const SESSION_CACHE_EXPIRATION = process.env.SESSION_CACHE_EXPIRATION ? Number(process.env.SESSION_CACHE_EXPIRATION) : 300
+const INVITATION_EXPIRATON = process.env.INVITATION_EXPIRATON ? Number(process.env.INVITATION_EXPIRATON) : 1800
 const APP_URL = process.env.NEXT_PUBLIC_ADMIN_URL
 export function createAuth(baseURL?: string) {
   return betterAuth({
@@ -161,10 +148,15 @@ export function createAuth(baseURL?: string) {
         schema: {
           organization: {
             additionalFields: {
-              plan: {
+              shippingPolicy: {
                 type: "string",
                 input: true,
-                required: true,
+                required: false,
+              },
+              returnsPolicy: {
+                type: "string",
+                input: true,
+                required: false,
               },
               status: {
                 type: "string",

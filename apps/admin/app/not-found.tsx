@@ -11,9 +11,7 @@ const NotFoundPage = () => {
         </div>
         <div className="grid gap-2">
           <h1 className="text-2xl font-bold">Page Not Found</h1>
-          <p className="text-sm text-muted-foreground">
-            The page you are looking for does not exist or has been moved.
-          </p>
+          <p className="text-sm text-muted-foreground">The page you are looking for does not exist or has been moved.</p>
         </div>
         <div className="flex justify-center gap-3">
           <Button asChild>

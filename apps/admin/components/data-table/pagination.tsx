@@ -3,12 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
 import { Button } from "@bs42/ui/components/button"
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import ClientOnlySelect from "@bs42/ui/components/client-only-select"
 import { PAGE_SIZE_OPTIONS } from "@/constants"
 import { PaginationConfig } from "."
@@ -58,31 +53,13 @@ const Pagination = ({ pagination }: PaginationProps) => {
           Page {page} of {totalPages.toLocaleString()}
         </div>
         <div className="flex items-center gap-x-2">
-          <Button
-            variant="outline"
-            className="hidden size-8 p-0 lg:flex"
-            onClick={() => navigate(1)}
-            disabled={page <= 1 || isPending}
-            aria-label="Go To First Page"
-          >
+          <Button variant="outline" className="hidden size-8 p-0 lg:flex" onClick={() => navigate(1)} disabled={page <= 1 || isPending} aria-label="Go To First Page">
             <ChevronsLeft />
           </Button>
-          <Button
-            variant="outline"
-            className="size-8 p-0"
-            onClick={() => navigate(page - 1)}
-            disabled={page <= 1 || isPending}
-            aria-label="Go To Previous Page"
-          >
+          <Button variant="outline" className="size-8 p-0" onClick={() => navigate(page - 1)} disabled={page <= 1 || isPending} aria-label="Go To Previous Page">
             <ChevronLeft />
           </Button>
-          <Button
-            variant="outline"
-            className="size-8 p-0"
-            onClick={() => navigate(page + 1)}
-            disabled={page >= totalPages || isPending}
-            aria-label="Go To Next Page"
-          >
+          <Button variant="outline" className="size-8 p-0" onClick={() => navigate(page + 1)} disabled={page >= totalPages || isPending} aria-label="Go To Next Page">
             <ChevronRight />
           </Button>
           <Button

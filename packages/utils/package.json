@@ -5,7 +5,11 @@
     ".": "./src/index.ts"
   },
   "devDependencies": {
-    "@bs42/typescript-config": "workspace:*"
+    "@bs42/typescript-config": "workspace:*",
+    "@bs42/types": "workspace:*"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "slugify": "^1.6.9"
+  }
 }

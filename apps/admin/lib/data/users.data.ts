@@ -4,16 +4,10 @@ import { headers } from "next/headers"
 import { getAllowedRoles, SystemRole } from "@bs42/auth"
 import { auth } from "../auth"
 import { formatError } from "@bs42/auth/server"
-import {
-  UsersData,
-  UsersFilters,
-  UserWithSessionsAndMemberships,
-} from "@/types"
+import { UsersData, UsersFilters, UserDetails } from "@/types"
 import { DataResponse } from "@bs42/types"
 
-export const fetchAllUsers = async (
-  filters: UsersFilters = {}
-): Promise<DataResponse<UsersData>> => {
+export async function getAllUsers(filters: UsersFilters = {}): Promise<DataResponse<UsersData>> {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }
@@ -58,9 +52,7 @@ export const fetchAllUsers = async (
   }
 }
 
-export const getUserById = async (
-  userId: string
-): Promise<DataResponse<UserWithSessionsAndMemberships | null>> => {
+export async function getUserById(userId: string): Promise<DataResponse<UserDetails>> {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }

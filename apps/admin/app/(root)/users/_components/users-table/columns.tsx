@@ -9,9 +9,9 @@ import ColumnHeader from "@/components/data-table/column-header"
 
 const genRoleBadge = (role: SystemRole) => {
   const roleConfig = {
-    superAdmin: { variant: "default" as const, className: "" },
-    admin: { variant: "secondary" as const, className: "" },
-    user: { variant: "outline" as const, className: "" },
+    superAdmin: { variant: "superAdmin" as const, className: "" },
+    admin: { variant: "admin" as const, className: "" },
+    user: { variant: "user" as const, className: "" },
   }
 
   const config = roleConfig[role] || roleConfig.user
@@ -23,21 +23,13 @@ export const columns: ColumnDef<User>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        onClick={(e) => e.stopPropagation()}
-      />
+      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" onClick={(e) => e.stopPropagation()} />
     ),
     enableSorting: false,
     enableHiding: false,
@@ -60,11 +52,7 @@ export const columns: ColumnDef<User>[] = [
     header: () => <ColumnHeader title="Status" sortKey="banned" />,
     cell: ({ row }) => {
       const isBanned = row.getValue("banned") as boolean
-      return (
-        <Badge variant={isBanned ? "destructive" : "default"}>
-          {isBanned ? "Banned" : "Active"}
-        </Badge>
-      )
+      return <Badge variant={isBanned ? "destructive" : "success"}>{isBanned ? "Banned" : "Active"}</Badge>
     },
   },
   {

@@ -21,8 +21,7 @@ interface SessionsListProps {
 // Create a dedicated component for the device icon
 const DeviceIcon = ({ userAgent }: { userAgent?: string | null }) => {
   if (!userAgent) return <GlobeIcon className="size-5 text-muted-foreground" />
-  if (/mobile|android|iphone/i.test(userAgent))
-    return <SmartphoneIcon className="size-5 text-muted-foreground" />
+  if (/mobile|android|iphone/i.test(userAgent)) return <SmartphoneIcon className="size-5 text-muted-foreground" />
   return <MonitorIcon className="size-5 text-muted-foreground" />
 }
 
@@ -35,13 +34,7 @@ const getDeviceLabel = (userAgent?: string | null) => {
   return "Desktop"
 }
 
-const SessionItem = ({
-  session,
-  currentSessionId,
-}: {
-  session: SessionOnly
-  currentSessionId: string
-}) => {
+const SessionItem = ({ session, currentSessionId }: { session: SessionOnly; currentSessionId: string }) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const isCurrent = session.id === currentSessionId
@@ -83,12 +76,7 @@ const SessionItem = ({
         </div>
       </div>
       {!isCurrent && (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={isPending}
-          onClick={handleRevoke}
-        >
+        <Button variant="outline" size="sm" disabled={isPending} onClick={handleRevoke}>
           {isPending ? <Spinner /> : "Revoke"}
         </Button>
       )}
@@ -100,11 +88,7 @@ const SessionsList = ({ sessions, currentSessionId }: SessionsListProps) => {
   return (
     <div className="flex flex-col divide-y">
       {sessions.map((session) => (
-        <SessionItem
-          key={session.id}
-          session={session}
-          currentSessionId={currentSessionId}
-        />
+        <SessionItem key={session.id} session={session} currentSessionId={currentSessionId} />
       ))}
     </div>
   )

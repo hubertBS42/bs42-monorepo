@@ -18,9 +18,7 @@ type StoreInvitationsPageProps = {
   }>
 }
 
-const StoreInvitationsPage = async ({
-  searchParams,
-}: StoreInvitationsPageProps) => {
+const StoreInvitationsPage = async ({ searchParams }: StoreInvitationsPageProps) => {
   const params = await searchParams
 
   const filters: InvitationsFilters = {
@@ -38,10 +36,8 @@ const StoreInvitationsPage = async ({
     <main className="flex flex-col gap-y-6">
       <div className="flex items-end justify-between">
         <div className="grid">
-          <h1 className="text-lg font-bold">Manage Invitations</h1>
-          <p className="text-sm text-muted-foreground">
-            View and manage invitations for this store.
-          </p>
+          <h1 className="text-xl font-bold md:text-2xl">Manage Invitations</h1>
+          <p className="text-sm text-muted-foreground">View and manage this store&apos;s invitations.</p>
         </div>
 
         <InviteMemberModal />

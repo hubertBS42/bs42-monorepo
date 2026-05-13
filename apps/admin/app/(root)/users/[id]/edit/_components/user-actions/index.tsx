@@ -1,6 +1,5 @@
 "use client"
 
-import { UserWithSessions } from "@/types"
 import { authClient } from "@/lib/auth-client"
 import ChangePassword from "./change-password"
 import ResetPassword from "./reset-password"
@@ -8,8 +7,9 @@ import UnbanUser from "./unban-user"
 import BanUser from "./ban-user"
 import DeleteUser from "./delete-user"
 import { SystemRole } from "@bs42/auth"
+import { User } from "@bs42/db/client"
 
-const UserActions = ({ user }: { user: UserWithSessions }) => {
+const UserActions = ({ user }: { user: User }) => {
   const { data, isPending: sessionIsLoading } = authClient.useSession()
 
   if (sessionIsLoading || !data) return

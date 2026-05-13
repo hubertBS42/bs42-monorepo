@@ -16,10 +16,7 @@ const NoStoresPage = () => {
         </div>
         <div className="grid gap-2">
           <h1 className="text-2xl font-bold">No Stores Found</h1>
-          <p className="text-sm text-muted-foreground">
-            You are not a member of any store on {APP_NAME}. Please contact your
-            administrator to be added to a store.
-          </p>
+          <p className="text-sm text-muted-foreground">You are not a member of any store on {APP_NAME}. Please contact your administrator to be added to a store.</p>
         </div>
         <SignOutButton />
       </div>

@@ -1,11 +1,4 @@
-import {
-  Building2,
-  LayoutDashboard,
-  LucideIcon,
-  ScrollTextIcon,
-  ShoppingBag,
-  UsersIcon,
-} from "lucide-react"
+import { Building2, LayoutDashboard, LucideIcon, ShoppingBag, UsersIcon } from "lucide-react"
 import { SystemRole } from "@bs42/auth"
 import { NavSubItem } from "@/types"
 
@@ -33,6 +26,29 @@ export const routePermissions: Record<string, RoutePermission> = {
       order: 1,
     },
   },
+  "/catalogue": {
+    role: ["superAdmin", "admin"],
+    context: ["global"],
+    nav: {
+      title: "Catalogue",
+      icon: ShoppingBag,
+      group: "main",
+      order: 2,
+      items: [
+        { title: "Products", url: "/catalogue/products", context: ["global"] },
+        {
+          title: "Categories",
+          url: "/catalogue/categories",
+          context: ["global"],
+        },
+        {
+          title: "Brands",
+          url: "/catalogue/brands",
+          context: ["global"],
+        },
+      ],
+    },
+  },
   "/stores": {
     role: ["superAdmin", "admin"],
     context: ["global"],
@@ -40,7 +56,7 @@ export const routePermissions: Record<string, RoutePermission> = {
       title: "Stores",
       icon: Building2,
       group: "main",
-      order: 2,
+      order: 3,
     },
   },
   "/users": {
@@ -50,52 +66,34 @@ export const routePermissions: Record<string, RoutePermission> = {
       title: "Users",
       icon: UsersIcon,
       group: "main",
-      order: 3,
-    },
-  },
-  "/logs": {
-    role: ["superAdmin", "admin"],
-    context: ["global"],
-    nav: {
-      title: "Logs",
-      icon: ScrollTextIcon,
-      group: "main",
       order: 4,
     },
   },
-  "/catalogue": {
-    role: ["superAdmin", "admin", "user"],
-    context: ["store"],
-    nav: {
-      title: "Catalogue",
-      icon: ShoppingBag,
-      group: "main",
-      order: 2,
-      items: [
-        { title: "Products", url: "/catalogue/products", context: ["store"] },
-        {
-          title: "Categories",
-          url: "/catalogue/categories",
-          context: ["store"],
-        },
-        {
-          title: "Brands",
-          url: "/catalogue/brands",
-          context: ["store"],
-        },
-      ],
-    },
-  },
+  // "/listings": {
+  //   role: ["superAdmin", "admin", "user"],
+  //   context: ["store"],
+  //   nav: {
+  //     title: "Listings",
+  //     icon: ClipboardList,
+  //     group: "main",
+  //     order: 2,
+  //   },
+  // },
+
   "/store": {
     role: ["superAdmin", "admin", "user"],
     context: ["store"],
     nav: {
       title: "Store",
       icon: Building2,
-      group: "secondary",
-      order: 1,
-      hideItems: true,
+      group: "main",
+      order: 2,
       items: [
+        {
+          title: "Listings",
+          url: "/store/listings",
+          context: ["store"],
+        },
         {
           title: "Members",
           url: "/store/members",
@@ -106,11 +104,6 @@ export const routePermissions: Record<string, RoutePermission> = {
           url: "/store/invitations",
           context: ["store"],
         },
-        // {
-        //   title: "Logs",
-        //   url: "/store/logs",
-        //   context: ["store"],
-        // },
       ],
     },
   },

@@ -38,7 +38,7 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 # Generated
-packages/database/generated
+packages/db/generated
 
 # pnpm
 .pnpm-store

@@ -6,24 +6,12 @@ interface ResourceFormFooterProps {
   backTo: string
   isPending: boolean
   isDirty: boolean
-  handleDiscard: () => Promise<void>
+  handleDiscard: () => Promise<void> | void
 }
-const ResourceFormFooter = ({
-  backTo,
-  isPending,
-  isDirty,
-  handleDiscard,
-}: ResourceFormFooterProps) => {
+const ResourceFormFooter = ({ backTo, isPending, isDirty, handleDiscard }: ResourceFormFooterProps) => {
   return (
     <div className="flex items-center justify-center gap-2 md:hidden">
-      {isDirty ? (
-        <DiscardChangesButton
-          isLoading={isPending}
-          handleDiscard={handleDiscard}
-        />
-      ) : (
-        <BackButton link={backTo} isLoading={isPending} />
-      )}
+      {isDirty ? <DiscardChangesButton isLoading={isPending} handleDiscard={handleDiscard} /> : <BackButton link={backTo} isLoading={isPending} />}
       <SaveButton isLoading={isPending} isDisabled={!isDirty} />
     </div>
   )
