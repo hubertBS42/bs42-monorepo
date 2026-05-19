@@ -24,17 +24,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 interface AddListingFormProps {
   product: ProductDetails
-  organizationId: string
 }
 
-const AddListingForm = ({ product, organizationId }: AddListingFormProps) => {
+const AddListingForm = ({ product }: AddListingFormProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const form = useForm<z.infer<typeof addListingFormSchema>>({
     resolver: zodResolver(addListingFormSchema),
     defaultValues: {
-      organizationId,
       productId: product.id,
       sellPrice: Number(product.baseSellPrice) || 0,
       buyPrice: Number(product.baseBuyPrice) || 0,

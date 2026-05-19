@@ -81,6 +81,35 @@ export function createAuth(baseURL?: string) {
       //   domain: process.env.COOKIE_DOMAIN,
       // },
     },
+    user: {
+      additionalFields: {
+        phone: {
+          type: "string",
+          required: false,
+          input: true,
+        },
+        dob: {
+          type: "date",
+          required: false,
+          input: true,
+        },
+        getMarketingEmails: {
+          type: "boolean",
+          required: false,
+          input: true,
+        },
+        getOrderEmails: {
+          type: "boolean",
+          required: false,
+          input: true,
+        },
+        getSecurityEmails: {
+          type: "boolean",
+          required: false,
+          input: true,
+        },
+      },
+    },
     plugins: [
       admin({
         ac: systemAccessController,

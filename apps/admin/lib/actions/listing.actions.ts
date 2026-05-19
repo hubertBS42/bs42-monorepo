@@ -5,17 +5,25 @@ import { ActionResponse } from "@bs42/types"
 import { isUUID } from "validator"
 import { z } from "zod"
 import { addListingFormSchema, updateListingFormSchema } from "../zod"
+import { headers } from "next/headers"
+import { auth } from "../auth"
 
 export async function createListingAction(data: z.infer<typeof addListingFormSchema>): Promise<ActionResponse> {
   try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const activeStoreId = session.session.activeOrganizationId
+    if (!activeStoreId) return { success: false, error: "No active store" }
+
     const validatedData = addListingFormSchema.parse(data)
 
-    const { organizationId, productId, sellPrice, buyPrice, compareAtPrice, stock, lowStockThreshold, trackInventory, status, isFeatured, variants } = validatedData
+    const { productId, sellPrice, buyPrice, compareAtPrice, stock, lowStockThreshold, trackInventory, status, isFeatured, variants } = validatedData
 
     await prisma.$transaction(async (tx) => {
       const listing = await tx.storeListing.create({
         data: {
-          organizationId,
+          organizationId: activeStoreId,
           productId,
           sellPrice,
           buyPrice: buyPrice || null,

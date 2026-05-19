@@ -18,13 +18,13 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@bs42/storage": "workspace:*",
+    "@bs42/utils": "workspace:*",
     "@noble/hashes": "^2.2.0",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "7.8.0",
     "@prisma/client-runtime-utils": "7.2.0",
-    "pg": "^8.16.3",
-    "@bs42/utils": "workspace:*",
-    "@bs42/storage": "workspace:*"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
     "@bs42/eslint-config": "workspace:*",

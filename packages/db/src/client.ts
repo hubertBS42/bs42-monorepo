@@ -546,6 +546,28 @@ function createPrisma() {
           return result ? convertDecimals(result) : result
         },
       },
+      order: {
+        async create({ args, query }) {
+          // Generate reference: BS42-YYYYMMDD-XXXXX
+          const date = new Date()
+          const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "")
+          const random = Math.random().toString(36).substring(2, 7).toUpperCase()
+          args.data.reference = `BS42-${dateStr}-${random}`
+          return query(args)
+        },
+        async findMany({ args, query }) {
+          const result = await query(args)
+          return result.map(convertDecimals)
+        },
+        async findUnique({ args, query }) {
+          const result = await query(args)
+          return result ? convertDecimals(result) : result
+        },
+        async findFirst({ args, query }) {
+          const result = await query(args)
+          return result ? convertDecimals(result) : result
+        },
+      },
     },
   })
 }

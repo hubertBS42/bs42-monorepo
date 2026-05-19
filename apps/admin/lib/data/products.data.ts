@@ -1,11 +1,11 @@
 "server-only"
-import { ProductsData, ProductsFilters, ProductDetails } from "@/types"
+import { ProductsData, ProductsFilters, ProductDetails, ProductForBrowser } from "@/types"
 import { formatError } from "@bs42/auth/server"
 import { prisma } from "@bs42/db"
 import { DataResponse } from "@bs42/types"
 import { isUUID } from "validator"
 
-export const getAllProducts = async (filters: ProductsFilters = {}): Promise<DataResponse<ProductsData>> => {
+export const getProductsForTable = async (filters: ProductsFilters = {}): Promise<DataResponse<ProductsData>> => {
   try {
     const { name, page = 1, pageSize = 10, sort, order } = filters
 
@@ -18,7 +18,22 @@ export const getAllProducts = async (filters: ProductsFilters = {}): Promise<Dat
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: { brand: true, categories: true },
+        select: {
+          id: true,
+          name: true,
+          images: true,
+          brand: {
+            select: { name: true },
+          },
+          baseSellPrice: true,
+          categories: {
+            select: { name: true },
+          },
+          condition: true,
+          hasVariants: true,
+          status: true,
+          createdAt: true,
+        },
         orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -35,6 +50,33 @@ export const getAllProducts = async (filters: ProductsFilters = {}): Promise<Dat
         pageSize,
         totalPages: Math.ceil(total / pageSize),
       },
+    }
+  } catch (error) {
+    return { success: false, error: formatError(error) }
+  }
+}
+
+export const getProductsForBrowser = async (): Promise<DataResponse<ProductForBrowser[]>> => {
+  try {
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        brand: {
+          select: { name: true },
+        },
+        images: true,
+        hasVariants: true,
+        categories: {
+          select: { name: true },
+        },
+        baseSellPrice: true,
+      },
+    })
+
+    return {
+      success: true,
+      data: products,
     }
   } catch (error) {
     return { success: false, error: formatError(error) }

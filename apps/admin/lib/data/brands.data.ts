@@ -6,7 +6,7 @@ import { Brand } from "@bs42/db/client"
 import { DataResponse } from "@bs42/types"
 import { isUUID } from "validator"
 
-export const getAllBrands = async (filters: BrandsFilters = {}): Promise<DataResponse<BrandsData>> => {
+export const getBrandsForTable = async (filters: BrandsFilters = {}): Promise<DataResponse<BrandsData>> => {
   try {
     const { name, page = 1, pageSize = 10, sort, order } = filters
 

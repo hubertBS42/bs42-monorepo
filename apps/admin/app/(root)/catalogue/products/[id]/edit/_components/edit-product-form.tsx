@@ -14,7 +14,6 @@ import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { useMemo, useState, useTransition } from "react"
 import ImageField from "@bs42/ui/components/image-field"
-import { deleteFilesAction, restoreFilesAction, uploadDocumentsAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import { Condition, Status } from "@bs42/db/enums"
 import { updateProductAction } from "@/lib/actions/product.actions"
 import { buildNodeTree } from "@bs42/utils"
@@ -34,6 +33,8 @@ import VariantSheet from "../../../_components/variant-sheet"
 import { generateSKU } from "@/lib/utils"
 import InputTagField from "@bs42/ui/components/input-tag-field"
 import DocumentField from "@bs42/ui/components/document-field"
+import ComboboxField from "@bs42/ui/components/combobox-field"
+import { deleteDocuments, deleteFiles, deleteImages, restoreFiles, uploadDocuments, uploadImages } from "@/lib/storage"
 
 interface EditProductFormProps {
   product: ProductDetails
@@ -110,7 +111,7 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
     const existingImages = watchedVariants?.flatMap((v) => v.images ?? []) ?? []
 
     if (existingImages.length) {
-      deleteFilesAction(existingImages) // fire and forget
+      deleteImages(existingImages) // fire and forget
     }
     const combinations: Record<string, string>[] = []
     const optionValues = variantOptions.map((opt) => ({
@@ -198,11 +199,11 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
   const handleAddImages = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveImage = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
@@ -259,12 +260,12 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
 
       // Only restore files that were actually deleted
       if (deletedFiles.length) {
-        await restoreFilesAction(deletedFiles)
+        await restoreFiles(deletedFiles)
       }
 
       // Delete any newly uploaded files
       if (newFiles.length) {
-        await deleteFilesAction(newFiles)
+        await deleteFiles(newFiles)
       }
 
       router.push("/catalogue/products")
@@ -274,7 +275,7 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
   const handleRemoveVariant = async (index: number) => {
     const variant = watchedVariants?.[index]
     if (variant?.images?.length) {
-      await deleteFilesAction(variant.images)
+      await deleteImages(variant.images)
     }
     removeVariant(index)
   }
@@ -282,11 +283,11 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
   const handleAddDocuments = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadDocumentsAction(formData)
+    return uploadDocuments(formData)
   }
 
   const handleRemoveDocument = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteDocuments([url])
   }
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -317,14 +318,14 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
                     <DescriptionField control={form.control} label="Description" name="description" placeholder="Provide a description" disabled={isPending} />
 
                     <div className="grid gap-5 sm:grid-cols-2">
-                      <SelectField
+                      <ComboboxField
                         control={form.control}
                         label="Brand"
                         name="brandId"
                         disabled={isPending}
-                        loadingPlaceholder="Select brand"
-                        placeholder="Select brand"
                         options={brandOptions}
+                        placeholder="Select brand"
+                        searchPlaceholder="Seach brands..."
                       />
 
                       <SelectField control={form.control} label="Condition" name="condition" disabled={isPending} loadingPlaceholder="New" options={CONDITION_OPTIONS} />
@@ -364,7 +365,7 @@ const EditProductForm = ({ product, categories, brands }: EditProductFormProps) 
                     onChange={async (checked) => {
                       if (!checked) {
                         const variantImages = watchedVariants?.flatMap((v) => v.images ?? []) ?? []
-                        if (variantImages.length) await deleteFilesAction(variantImages)
+                        if (variantImages.length) await deleteImages(variantImages)
                         // Clear variant variantOptions and variants
                         form.setValue("variantOptions", [])
                         form.setValue("variants", [])

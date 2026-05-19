@@ -31,6 +31,11 @@ export const columns: ColumnDef<Category>[] = [
     header: () => <ColumnHeader title="Slug" sortKey="slug" enableSorting={false} />,
   },
   {
+    accessorKey: "isFeatured",
+    header: () => <ColumnHeader title="Featured" sortKey="isFeatured" enableSorting={false} />,
+    cell: ({ row }) => (row.original.isFeatured ? <Badge variant="featured">Featured</Badge> : null),
+  },
+  {
     accessorKey: "status",
     header: () => <ColumnHeader title="Status" sortKey="status" enableSorting={false} />,
     cell: ({ row }) => genStatusBadge(row.original.status),

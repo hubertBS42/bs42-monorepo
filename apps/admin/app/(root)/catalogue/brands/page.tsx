@@ -1,5 +1,5 @@
 import AddButton from "@/components/add-button"
-import { getAllBrands } from "@/lib/data/brands.data"
+import { getBrandsForTable } from "@/lib/data/brands.data"
 import { BrandsFilters } from "@/types"
 import { Metadata } from "next"
 import BrandsTable from "./_components/brands-table"
@@ -27,7 +27,7 @@ const BrandsPage = async ({ searchParams }: BrandsPageProps) => {
     order: params.order as "asc" | "desc" | undefined,
   }
 
-  const response = await getAllBrands(filters)
+  const response = await getBrandsForTable(filters)
   if (!response.success) throw new Error(response.error)
   return (
     <main className="flex flex-col gap-y-6">

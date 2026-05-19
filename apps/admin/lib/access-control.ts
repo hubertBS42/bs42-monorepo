@@ -1,4 +1,4 @@
-import { Building2, LayoutDashboard, LucideIcon, ShoppingBag, UsersIcon } from "lucide-react"
+import { Building2, LayoutDashboard, LucideIcon, ShoppingBag, ShoppingCart, UsersIcon } from "lucide-react"
 import { SystemRole } from "@bs42/auth"
 import { NavSubItem } from "@/types"
 
@@ -69,6 +69,16 @@ export const routePermissions: Record<string, RoutePermission> = {
       order: 4,
     },
   },
+  "/orders": {
+    role: ["superAdmin", "admin"],
+    context: ["global"],
+    nav: {
+      title: "Orders",
+      icon: ShoppingCart,
+      group: "main",
+      order: 5,
+    },
+  },
   // "/listings": {
   //   role: ["superAdmin", "admin", "user"],
   //   context: ["store"],
@@ -92,6 +102,11 @@ export const routePermissions: Record<string, RoutePermission> = {
         {
           title: "Listings",
           url: "/store/listings",
+          context: ["store"],
+        },
+        {
+          title: "Orders",
+          url: "/store/orders",
           context: ["store"],
         },
         {

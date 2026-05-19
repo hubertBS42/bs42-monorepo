@@ -15,13 +15,13 @@ import ResourceFormFooter from "@/components/resource-form-footer"
 import { useMemo, useTransition } from "react"
 import ImageField from "@bs42/ui/components/image-field"
 import SelectTreeField from "@bs42/ui/components/select-tree-field"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import { Status } from "@bs42/db/enums"
 import { createCategoryAction } from "@/lib/actions/category.actions"
 import { buildNodeTree } from "@bs42/utils"
 import TextAreaField from "@bs42/ui/components/textarea-field"
 import SwitchCardField from "@bs42/ui/components/switch-card-field"
 import { CategoryForSelect } from "@/types"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 const AddCategoryForm = ({ categories }: { categories: CategoryForSelect[] }) => {
   const router = useRouter()
@@ -65,17 +65,17 @@ const AddCategoryForm = ({ categories }: { categories: CategoryForSelect[] }) =>
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
     startTransition(async () => {
       const image = form.getValues("image")
-      if (image?.trim()) await deleteFilesAction([image])
+      if (image?.trim()) await deleteImages([image])
       router.push("/catalogue/categories")
     })
   }

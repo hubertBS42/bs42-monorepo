@@ -154,6 +154,13 @@ export const BREADCRUMB_DATA: BreadcrumbConfig[] = [
     ],
   },
   {
+    pathname: "/orders",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Orders", href: "#" },
+    ],
+  },
+  {
     pathname: "/members",
     segments: [
       { text: "Dashboard", href: "/" },
@@ -199,6 +206,32 @@ export const BREADCRUMB_DATA: BreadcrumbConfig[] = [
       { text: "Store", href: "/store" },
       { text: "Manage Listings", href: "/store/listings" },
       { text: "Edit Listing", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/orders",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Orders", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/orders/add",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Orders", href: "/store/orders" },
+      { text: "Add Order", href: "#" },
+    ],
+  },
+  {
+    pathname: "/store/orders/[id]/details",
+    segments: [
+      { text: "Dashboard", href: "/" },
+      { text: "Store", href: "/store" },
+      { text: "Manage Orders", href: "/store/orders" },
+      { text: "Order Details", href: "#" },
     ],
   },
   {

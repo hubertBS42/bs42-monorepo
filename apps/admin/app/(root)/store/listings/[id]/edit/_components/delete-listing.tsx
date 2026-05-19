@@ -5,7 +5,6 @@ import { useState, useTransition } from "react"
 import { toast } from "@bs42/ui/components/sonner"
 import { Button } from "@bs42/ui/components/button"
 import { deleteListingAction } from "@/lib/actions/listing.actions"
-import { Product, StoreListing } from "@bs42/db/client"
 import { authClient } from "@/lib/auth-client"
 import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 import { StoreRole } from "@bs42/auth"
@@ -21,8 +20,9 @@ import {
   AlertDialogTrigger,
 } from "@bs42/ui/components/alert-dialog"
 import { Spinner } from "@bs42/ui/components/spinner"
+import { ListingDetails } from "@/types"
 
-const DeleteListing = ({ listing }: { listing: StoreListing & { product: Product } }) => {
+const DeleteListing = ({ listing }: { listing: ListingDetails }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)

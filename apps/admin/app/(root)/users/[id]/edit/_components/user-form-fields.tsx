@@ -1,18 +1,23 @@
 "use client"
 
 import InputField from "@bs42/ui/components/input-field"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bs42/ui/components/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@bs42/ui/components/card"
 import { Badge } from "@bs42/ui/components/badge"
 import { UserDetails } from "@/types"
 import { capitalizeFirstLetter } from "@bs42/utils"
 import { format } from "date-fns"
 import { Control, FieldValues, Path, UseFormClearErrors } from "react-hook-form"
 import dynamic from "next/dynamic"
-import { Field, FieldLabel } from "@bs42/ui/components/field"
+import { Field, FieldGroup, FieldLabel } from "@bs42/ui/components/field"
 import { Input } from "@bs42/ui/components/input"
 import ImageField from "@bs42/ui/components/image-field"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
+import Addresses from "./addresses"
+import AddAddressDialog from "./addresses/add-address-dialog"
+import DateField from "@bs42/ui/components/date-field"
+import SwitchCardField from "@bs42/ui/components/switch-card-field"
+import PhoneField from "@bs42/ui/components/phone-field"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 const UserActions = dynamic(() => import("./user-actions"), {
   ssr: false,
@@ -30,42 +35,102 @@ const UserFormFields = <T extends FieldValues>({ control, user, isPending, clear
   const handleAddAvatar = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveAvatar = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   return (
     <div className="grid items-stretch gap-4 lg:grid-cols-3">
-      <div className="lg:col-span-2">
+      <div className="grid gap-4 lg:col-span-2">
         {/* Details card */}
-        <Card className="h-full">
+        <Card>
           <CardHeader>
             <CardTitle>User Details</CardTitle>
             <CardDescription>Basic information about the user.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-5">
-            <ImageField
-              control={control}
-              name={"image" as Path<T>}
-              sizeLimit={100}
-              maxImages={1}
-              onAdd={handleAddAvatar}
-              onRemove={handleRemoveAvatar}
-              clearErrors={clearErrors}
-              label="Avatar"
-              disabled={isPending}
-              className="max-w-25"
-              defaultValues={user.image}
-            />
-            <InputField control={control} label="Full Name" name={"name" as Path<T>} disabled={isPending} />
-            <InputField control={control} label="Email" name={"email" as Path<T>} type="email" disabled />
-            <Field className="gap-y-1">
-              <FieldLabel>System Role</FieldLabel>
-              <Input defaultValue={capitalizeFirstLetter(user.role)} disabled />
-            </Field>
+          <CardContent className="cols-2 grid gap-5">
+            <div className="col-span-2 grid">
+              <ImageField
+                control={control}
+                name={"image" as Path<T>}
+                sizeLimit={100}
+                maxImages={1}
+                onAdd={handleAddAvatar}
+                onRemove={handleRemoveAvatar}
+                clearErrors={clearErrors}
+                label="Avatar"
+                disabled={isPending}
+                className="max-w-25"
+                defaultValues={user.image}
+              />
+            </div>
+            <div className="col-span-2 grid">
+              <InputField control={control} label="Full Name" name={"name" as Path<T>} disabled={isPending} />
+            </div>
+            <div className="col-span-2 grid lg:col-span-1">
+              <InputField control={control} label="Email" name={"email" as Path<T>} type="email" disabled />
+            </div>
+            <div className="col-span-2 grid lg:col-span-1">
+              <PhoneField control={control} label="Phone" name={"phone" as Path<T>} disabled={isPending} defaultCountry="GH" />
+            </div>
+
+            <div className="col-span-2 grid lg:col-span-1">
+              <DateField
+                control={control}
+                name={"dob" as Path<T>}
+                label="Date of birth"
+                disabled={isPending}
+                disabledDates={(date) => date > new Date() || date < new Date("1900-01-01")}
+              />
+            </div>
+            <div className="col-span-2 grid lg:col-span-1">
+              <Field className="gap-y-1">
+                <FieldLabel>System Role</FieldLabel>
+                <Input defaultValue={capitalizeFirstLetter(user.role)} disabled />
+              </Field>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Addresses</CardTitle>
+            <CardDescription>Lipsum dolor sit amet, consectetur</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Addresses addresses={user.addresses} />
+          </CardContent>
+          <CardFooter className="justify-center border-t p-4">
+            <AddAddressDialog userId={user.id} />
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Settings</CardTitle>
+            <CardDescription>Settings for this user.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup className="gap-3">
+              <SwitchCardField
+                control={control}
+                name={"getMarketingEmails" as Path<T>}
+                label="Marketing emails"
+                description="Receive emails about new products,  and more."
+                disabled={isPending}
+              />
+              <SwitchCardField
+                control={control}
+                name={"getSecurityEmails" as Path<T>}
+                label="Security emails"
+                description="Receive emails about account security."
+                disabled={isPending}
+              />
+              <SwitchCardField control={control} name={"getOrderEmails" as Path<T>} label="Order emails" description="Receive emails about order updates." disabled={isPending} />
+            </FieldGroup>
           </CardContent>
         </Card>
       </div>

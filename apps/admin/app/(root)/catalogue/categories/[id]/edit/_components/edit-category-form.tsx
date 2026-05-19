@@ -15,7 +15,6 @@ import ResourceFormFooter from "@/components/resource-form-footer"
 import { useMemo, useTransition } from "react"
 import ImageField from "@bs42/ui/components/image-field"
 import SelectTreeField from "@bs42/ui/components/select-tree-field"
-import { deleteFilesAction, restoreFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import { Status } from "@bs42/db/enums"
 import { updateCategoryAction } from "@/lib/actions/category.actions"
 import { Category } from "@bs42/db/client"
@@ -25,6 +24,7 @@ import SwitchCardField from "@bs42/ui/components/switch-card-field"
 import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 import dynamic from "next/dynamic"
 import { CategoryForSelect } from "@/types"
+import { deleteImages, restoreImages, uploadImages } from "@/lib/storage"
 
 const DeleteCategory = dynamic(() => import("./delete-category"), {
   ssr: false,
@@ -83,11 +83,11 @@ const EditCategoryForm = ({ category, categories }: EditCategoryFormProps) => {
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
@@ -95,18 +95,18 @@ const EditCategoryForm = ({ category, categories }: EditCategoryFormProps) => {
       const image = form.getValues("image")
       // delete new image
       if (image && !category.image) {
-        await deleteFilesAction([image])
+        await deleteImages([image])
       }
 
       // delete new image and restore previous image
       if (image && category.image && image !== category.image) {
-        await deleteFilesAction([image])
-        await restoreFilesAction([category.image])
+        await deleteImages([image])
+        await restoreImages([category.image])
       }
 
       // restore deleted image
       if (!image && category.image) {
-        await restoreFilesAction([category.image])
+        await restoreImages([category.image])
       }
 
       router.push("/catalogue/categories")

@@ -13,12 +13,12 @@ import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { useTransition } from "react"
 import { createBrandAction } from "@/lib/actions/brand.actions"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import ImageField from "@bs42/ui/components/image-field"
 import TextAreaField from "@bs42/ui/components/textarea-field"
 import SwitchCardField from "@bs42/ui/components/switch-card-field"
 import { BRAND_STATUS_OPTIONS } from "@/constants"
 import { Status } from "@bs42/db/enums"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 const AddBrandForm = () => {
   const router = useRouter()
@@ -59,17 +59,17 @@ const AddBrandForm = () => {
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return await uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
     startTransition(async () => {
       const image = form.getValues("logo")
-      if (image?.trim()) await deleteFilesAction([image])
+      if (image?.trim()) await deleteImages([image])
       router.push("/catalogue/brands")
     })
   }

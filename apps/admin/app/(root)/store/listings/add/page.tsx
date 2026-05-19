@@ -1,10 +1,8 @@
 import { Metadata } from "next"
 import AddListingForm from "./_components/add-listing-form"
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
-import { notFound, redirect } from "next/navigation"
-import { getAllProducts, getProductById } from "@/lib/data/products.data"
-import { getStoreListings } from "@/lib/data/listings.data"
+import { notFound } from "next/navigation"
+import { getProductsForBrowser, getProductById } from "@/lib/data/products.data"
+import { getListingsForBrowser } from "@/lib/data/listings.data"
 import ProductBrowser from "./_components/product-browser"
 
 export const metadata: Metadata = {
@@ -15,26 +13,17 @@ type AddListingPageProps = {
   searchParams: Promise<{ productId?: string }>
 }
 const AddListingPage = async ({ searchParams }: AddListingPageProps) => {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect("/sign-in")
-
-  const activeStoreId = session.session.activeOrganizationId
-  if (!activeStoreId) redirect("/")
-
   const { productId } = await searchParams
 
   // Step 1 — no product selected yet, show product browser
   if (!productId) {
-    const [productsResponse, listingsResponse] = await Promise.all([
-      getAllProducts(),
-      getStoreListings({ pageSize: 1000 }), // get all to check listed status
-    ])
+    const [productsResponse, listingsResponse] = await Promise.all([getProductsForBrowser(), getListingsForBrowser()])
 
     if (!productsResponse.success) throw new Error(productsResponse.error)
 
-    const listedProductIds = new Set(listingsResponse.success ? listingsResponse.data.data.map((l) => l.productId) : [])
+    const listedProductIds = new Set(listingsResponse.success ? listingsResponse.data.map((l) => l.product.id) : [])
 
-    const unlistedProducts = productsResponse.data.data.filter((p) => !listedProductIds.has(p.id))
+    const unlistedProducts = productsResponse.data.filter((p) => !listedProductIds.has(p.id))
 
     return (
       <main className="flex flex-col gap-y-6">
@@ -54,7 +43,7 @@ const AddListingPage = async ({ searchParams }: AddListingPageProps) => {
     throw new Error(productResponse.error)
   }
 
-  return <AddListingForm product={productResponse.data} organizationId={activeStoreId} />
+  return <AddListingForm product={productResponse.data} />
 }
 
 export default AddListingPage

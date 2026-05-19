@@ -8,7 +8,7 @@ import ImageField from "@bs42/ui/components/image-field"
 import { FieldGroup } from "@bs42/ui/components/field"
 import { Badge } from "@bs42/ui/components/badge"
 import { Separator } from "@bs42/ui/components/separator"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 interface VariantSheetProps<T extends FieldValues> {
   open: boolean
@@ -24,11 +24,11 @@ const VariantSheet = <T extends FieldValues>({ open, onOpenChange, index, contro
   const handleAddImages = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveImage = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   return (

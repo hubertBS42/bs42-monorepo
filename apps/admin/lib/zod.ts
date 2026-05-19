@@ -4,6 +4,34 @@ import { Condition, Status } from "@bs42/db/enums"
 import { z } from "zod"
 import { isURL, isUUID } from "validator"
 
+// Lazy load phone validator only when needed
+const getPhoneValidator = () => import("@bs42/ui/lib/utils").then((mod) => mod.isPossiblePhoneNumber)
+
+// Optional phone schema (for fields that can be null/empty)
+const optionalPhoneSchema = z
+  .string()
+  .nullable()
+  .refine(
+    async (data) => {
+      if (!data) return true
+      const isPossiblePhoneNumber = await getPhoneValidator()
+      return isPossiblePhoneNumber(data)
+    },
+    { message: "Invalid phone number" }
+  )
+
+// Required phone schema (for fields that must have a valid phone)
+export const requiredPhoneSchema = z
+  .string()
+  .min(1, "Phone number is required")
+  .refine(
+    async (data) => {
+      const isPossiblePhoneNumber = await getPhoneValidator()
+      return isPossiblePhoneNumber(data)
+    },
+    { message: "Invalid phone number" }
+  )
+
 export const signInFormSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string(),
@@ -46,17 +74,27 @@ export const changePasswordFormSchema = z
     path: ["confirmPassword"],
   })
 
+const baseUserFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.email("Please enter a valid email address"),
+  phone: optionalPhoneSchema,
+  dob: z
+    .date()
+    .nullable()
+    .refine((date) => !date || date.getTime() < Date.now(), {
+      message: "Date of birth must be in the past.",
+    }),
+  image: z.url("Invalid URL").optional().or(z.literal("")),
+  getMarketingEmails: z.boolean(),
+  getSecurityEmails: z.boolean(),
+  getOrderEmails: z.boolean(),
+})
+
 export const addUserFormSchema = z.discriminatedUnion("systemRole", [
-  z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.email("Please enter a valid email address"),
-    image: z.url("Invalid URL").optional().or(z.literal("")),
+  baseUserFormSchema.extend({
     systemRole: z.literal("admin"),
   }),
-  z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.email("Please enter a valid email address"),
-    image: z.url("Invalid URL").optional().or(z.literal("")),
+  baseUserFormSchema.extend({
     systemRole: z.literal("user"),
     stores: z.array(
       z.object({
@@ -67,18 +105,11 @@ export const addUserFormSchema = z.discriminatedUnion("systemRole", [
   }),
 ])
 
-export const editAdminFormSchema = z.object({
+export const editAdminFormSchema = baseUserFormSchema.extend({
   id: z.string().min(1, "ID is required"),
-  name: z.string().min(1, "Name is required"),
-  email: z.email("Please enter a valid email address"),
-  image: z.url("Invalid URL").optional().or(z.literal("")),
 })
 
-export const editStoreUserFormSchema = z.object({
-  id: z.string().min(1, "ID is required"),
-  name: z.string().min(1, "Name is required"),
-  email: z.email("Please enter a valid email address"),
-  image: z.url("Invalid URL").optional().or(z.literal("")),
+export const editStoreUserFormSchema = editAdminFormSchema.extend({
   stores: z.array(
     z.object({
       memberId: z.string().optional(),
@@ -90,6 +121,24 @@ export const editStoreUserFormSchema = z.object({
 })
 
 export const editUserFormSchema = z.discriminatedUnion("systemRole", [editAdminFormSchema, editStoreUserFormSchema])
+
+// Schema for adding user address
+export const addAddressFormSchema = z.object({
+  name: z.string().min(1, "You must provide a full name.").min(3, "Full name must be at least 3 characters."),
+  phone: requiredPhoneSchema,
+  line1: z.string().min(1, "You must provide a valid address."),
+  line2: z.string(),
+  region: z.string().min(1, "You must provide a region."),
+  town: z.string().min(1, "You must provide a town."),
+  latitude: z.number().min(-90, "Latitude must be at least -90").max(90, "Latitude cannot be greater than 90").nullable(),
+  longitude: z.number().min(-180, "Longitude must be at least -180").max(180, "Longitude cannot be greater than 180").nullable(),
+  isDefault: z.boolean(),
+})
+
+// Schema for updating user address
+export const updateAddressFormSchema = addAddressFormSchema.extend({
+  id: z.string().min(1, "ID is required"),
+})
 
 export const banUserFormSchema = z.object({
   userId: z.string().min(1, "UserId is required"),
@@ -106,13 +155,6 @@ export const inviteMemberFormSchema = z.object({
   email: z.email("Please enter a valid email address"),
   role: z.enum(["member", "admin"] as const),
 })
-
-// const slugSchema = z
-//   .string()
-//   .min(1, "You must provide a store slug")
-//   .min(3, "Slug must be at least 3 characters")
-//   .max(63, "Slug must be 63 characters or less")
-//   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug can only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen")
 
 export const addStoreFormSchema = z.object({
   name: z.string().min(1, "You must provide an store name").min(3, "Store name must be at least 3 characters"),
@@ -357,18 +399,79 @@ const listingVariantSchema = z.object({
   status: z.enum(Status),
 })
 
-export const addListingFormSchema = z.object({
-  organizationId: z.uuid(),
-  productId: z.uuid(),
-  sellPrice: decimalSchema,
-  buyPrice: optionalDecimalSchema,
-  compareAtPrice: optionalDecimalSchema,
-  stock: z.number().int().min(0, "Stock cannot be negative"),
-  lowStockThreshold: z.number().int().min(0),
-  trackInventory: z.boolean(),
-  status: z.enum(Status),
-  isFeatured: z.boolean(),
-  variants: z.array(listingVariantSchema).optional(),
-})
+export const addListingFormSchema = z
+  .object({
+    productId: z.uuid(),
+    sellPrice: decimalSchema,
+    buyPrice: optionalDecimalSchema,
+    compareAtPrice: optionalDecimalSchema,
+    stock: z.number().int().min(0, "Stock cannot be negative"),
+    lowStockThreshold: z.number().int().min(0),
+    trackInventory: z.boolean(),
+    status: z.enum(Status),
+    isFeatured: z.boolean(),
+    variants: z.array(listingVariantSchema).optional(),
+  })
+  .refine((data) => !data.compareAtPrice || data.compareAtPrice > data.sellPrice, {
+    message: "Compare at price must be greater than sell price",
+    path: ["compareAtPrice"],
+  })
 
 export const updateListingFormSchema = addListingFormSchema.extend({ id: z.uuid() })
+
+export const orderItemSchema = z.object({
+  storeListingId: z.uuid(),
+  storeListingVariantId: z.uuid().nullable().optional(),
+  quantity: z.number().int().min(1, "Quantity must be at least 1"),
+  unitPrice: z.number().min(0),
+  productName: z.string(),
+  productSlug: z.string(),
+  productImage: z.string().nullable().optional(),
+  variantDescription: z.string().nullable().optional(),
+  sku: z.string().nullable().optional(),
+  storeName: z.string(),
+})
+
+export const createOrderFormSchema = z
+  .object({
+    userId: z.uuid().nullable().optional(),
+    items: z.array(orderItemSchema).min(1, "At least one item is required"),
+    customerName: z.string().min(1, "Customer name is required"),
+    customerEmail: z.email("Invalid email address").min(1, "Email is required"),
+    customerPhone: optionalPhoneSchema,
+    shippingMethod: z.enum(["delivery", "pickup"]),
+    shippingName: z.string().optional(),
+    shippingPhone: z.string().nullable().optional(),
+    shippingLine1: z.string().optional(),
+    shippingLine2: z.string().nullable().optional(),
+    shippingRegion: z.string().optional(),
+    shippingTown: z.string().optional(),
+    shippingLat: z.number().nullable().optional(),
+    shippingLng: z.number().nullable().optional(),
+    shippingPrice: z.number().min(0),
+    taxPrice: z.number().min(0),
+    notes: z.string().nullable().optional(),
+  })
+  .superRefine(async (data, ctx) => {
+    if (data.shippingMethod === "delivery") {
+      const isPossiblePhoneNumber = await getPhoneValidator()
+      if (!data.shippingName?.trim()) {
+        ctx.addIssue({ code: "custom", message: "Recipient name is required", path: ["shippingName"] })
+      }
+      if (!data.shippingPhone?.trim()) {
+        ctx.addIssue({ code: "custom", message: "Recipient phone number is required", path: ["shippingPhone"] })
+      }
+      if (data.shippingPhone && !isPossiblePhoneNumber(data.shippingPhone)) {
+        ctx.addIssue({ code: "custom", message: "Recipient phone number is invalid", path: ["shippingPhone"] })
+      }
+      if (!data.shippingLine1?.trim()) {
+        ctx.addIssue({ code: "custom", message: "Address line 1 is required", path: ["shippingLine1"] })
+      }
+      if (!data.shippingRegion?.trim()) {
+        ctx.addIssue({ code: "custom", message: "Region is required", path: ["shippingRegion"] })
+      }
+      if (!data.shippingTown?.trim()) {
+        ctx.addIssue({ code: "custom", message: "Town is required", path: ["shippingTown"] })
+      }
+    }
+  })

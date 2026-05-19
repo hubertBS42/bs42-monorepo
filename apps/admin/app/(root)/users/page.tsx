@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import UsersTable from "./_components/users-table"
-import { getAllUsers } from "@/lib/data/users.data"
+import { getUsersForTable } from "@/lib/data/users.data"
 import AddButton from "@/components/add-button"
 import { UsersFilters } from "@/types"
 
@@ -27,7 +27,7 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
     order: params.order as "asc" | "desc" | undefined,
   }
 
-  const result = await getAllUsers(filters)
+  const result = await getUsersForTable(filters)
   if (!result.success) throw new Error(result.error)
   return (
     <main className="flex flex-col gap-y-6">

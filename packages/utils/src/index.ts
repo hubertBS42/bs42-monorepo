@@ -119,18 +119,19 @@ export const collectDescendantIds = (items: { id: string; parentId: string | nul
   return Array.from(result)
 }
 
-const CURRENCY_FOMATTER = new Intl.NumberFormat("en-US", {
-  currency: "USD",
-  style: "currency",
-  minimumFractionDigits: 2,
-})
+export function formatCurrency(amount: number | string | null, currency: string = "USD", locale: string = "en-US", options?: Intl.NumberFormatOptions) {
+  const formatter = new Intl.NumberFormat(locale, {
+    currency: currency,
+    style: "currency",
+    minimumFractionDigits: 2,
+    ...options,
+  })
 
-// Format currency using the formatter above
-export function formatCurrency(amount: number | string | null) {
   if (typeof amount === "number") {
-    return CURRENCY_FOMATTER.format(amount)
+    return formatter.format(amount)
   } else if (typeof amount === "string") {
-    return CURRENCY_FOMATTER.format(Number(amount))
+    const parsed = Number(amount)
+    return isNaN(parsed) ? "NaN" : formatter.format(parsed)
   } else {
     return "NaN"
   }

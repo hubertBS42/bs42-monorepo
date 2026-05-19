@@ -12,12 +12,11 @@ import UserFormFields from "./user-form-fields"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { updateUserAction } from "@/lib/actions/user.actions"
-import { deleteFilesAction, restoreFilesAction } from "@/lib/actions/storage.actions"
+import { deleteImages, restoreImages } from "@/lib/storage"
 
 const EditAdminForm = ({ user }: { user: UserDetails }) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-
   const form = useForm<z.infer<typeof editAdminFormSchema>>({
     resolver: zodResolver(editAdminFormSchema),
     defaultValues: {
@@ -25,6 +24,11 @@ const EditAdminForm = ({ user }: { user: UserDetails }) => {
       name: user.name,
       email: user.email,
       image: user.image ?? "",
+      phone: user.phone,
+      dob: user.dob,
+      getMarketingEmails: user.getMarketingEmails,
+      getSecurityEmails: user.getSecurityEmails,
+      getOrderEmails: user.getOrderEmails,
     },
   })
 
@@ -35,6 +39,11 @@ const EditAdminForm = ({ user }: { user: UserDetails }) => {
         name: data.name,
         email: data.email,
         image: data.image,
+        phone: data.phone ?? null,
+        dob: data.dob ?? null,
+        getMarketingEmails: data.getMarketingEmails,
+        getOrderEmails: data.getOrderEmails,
+        getSecurityEmails: data.getSecurityEmails,
       })
 
       if (!result.success) {
@@ -52,18 +61,18 @@ const EditAdminForm = ({ user }: { user: UserDetails }) => {
       const image = form.getValues("image")
       // delete new image
       if (image && !user.image) {
-        await deleteFilesAction([image])
+        await deleteImages([image])
       }
 
       // delete new image and restore previous image
       if (image && user.image && image !== user.image) {
-        await deleteFilesAction([image])
-        await restoreFilesAction([user.image])
+        await deleteImages([image])
+        await restoreImages([user.image])
       }
 
       // restore deleted image
       if (!image && user.image) {
-        await restoreFilesAction([user.image])
+        await restoreImages([user.image])
       }
 
       router.push("/users")

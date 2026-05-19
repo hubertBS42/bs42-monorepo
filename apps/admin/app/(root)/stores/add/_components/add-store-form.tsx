@@ -16,8 +16,8 @@ import ResourceFormFooter from "@/components/resource-form-footer"
 import { useTransition } from "react"
 import { StoreStatus } from "@/types"
 import ImageField from "@bs42/ui/components/image-field"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import DescriptionField from "@/components/description-field"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 const AddStoreForm = () => {
   const router = useRouter()
@@ -58,17 +58,17 @@ const AddStoreForm = () => {
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
     startTransition(async () => {
       const image = form.getValues("logo")
-      if (image?.trim()) await deleteFilesAction([image])
+      if (image?.trim()) await deleteImages([image])
       router.push("/stores")
     })
   }

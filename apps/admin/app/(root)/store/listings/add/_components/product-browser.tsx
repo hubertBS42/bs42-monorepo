@@ -9,10 +9,10 @@ import { Badge } from "@bs42/ui/components/badge"
 import { Card, CardContent, CardFooter } from "@bs42/ui/components/card"
 import { Search, Loader } from "lucide-react"
 import { formatCurrency } from "@bs42/utils"
-import { ProductListItem } from "@/types"
+import { ProductForBrowser } from "@/types"
 
 interface ProductBrowserProps {
-  products: ProductListItem[]
+  products: ProductForBrowser[]
 }
 
 const ProductBrowser = ({ products }: ProductBrowserProps) => {
@@ -49,7 +49,7 @@ const ProductBrowser = ({ products }: ProductBrowserProps) => {
           <p className="text-sm text-muted-foreground">No products found</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {filtered.map((product) => {
             const isSelecting = selectingId === product.id && isPending
             const image = product.images[0]
@@ -74,7 +74,7 @@ const ProductBrowser = ({ products }: ProductBrowserProps) => {
                   )}
                 </div>
 
-                <CardContent className="grid gap-1">
+                <CardContent className="grid gap-1 px-3">
                   <p className="truncate leading-tight font-medium">{product.name}</p>
                   <p className="text-xs text-muted-foreground">{product.brand.name}</p>
                   <p className="text-sm font-medium">{formatCurrency(Number(product.baseSellPrice))}</p>
@@ -86,7 +86,7 @@ const ProductBrowser = ({ products }: ProductBrowserProps) => {
                   )}
                 </CardContent>
 
-                <CardFooter className="p-4 pt-0">
+                <CardFooter className="px-3 pt-0 pb-3">
                   <Button size="sm" className="w-full" onClick={() => handleSelect(product.id)} disabled={isPending}>
                     {isSelecting ? (
                       <>
@@ -94,7 +94,7 @@ const ProductBrowser = ({ products }: ProductBrowserProps) => {
                         Loading...
                       </>
                     ) : (
-                      "List This"
+                      "List Product"
                     )}
                   </Button>
                 </CardFooter>

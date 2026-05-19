@@ -20,7 +20,11 @@ import ResourceFormFooter from "@/components/resource-form-footer"
 import { capitalizeFirstLetter } from "@bs42/utils"
 import { StoreForSelect } from "@/types"
 import ImageField from "@bs42/ui/components/image-field"
-import { deleteFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
+import DateField from "@bs42/ui/components/date-field"
+import SwitchCardField from "@bs42/ui/components/switch-card-field"
+import { FieldGroup } from "@bs42/ui/components/field"
+import PhoneField from "@bs42/ui/components/phone-field"
+import { deleteImages, uploadImages } from "@/lib/storage"
 
 const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
   const router = useRouter()
@@ -32,6 +36,11 @@ const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
       name: "",
       email: "",
       image: "",
+      phone: "",
+      dob: null,
+      getMarketingEmails: true,
+      getOrderEmails: true,
+      getSecurityEmails: true,
       systemRole: "user",
       stores: [],
     },
@@ -67,6 +76,11 @@ const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
         password: generatePassword({ passwordLength: 16 }),
         systemRole: data.systemRole,
         image: data.image,
+        phone: data.phone ?? null,
+        dob: data.dob ?? null,
+        getMarketingEmails: data.getMarketingEmails,
+        getOrderEmails: data.getOrderEmails,
+        getSecurityEmails: data.getSecurityEmails,
         stores: data.systemRole === "user" ? data.stores : undefined,
       })
 
@@ -89,17 +103,17 @@ const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
   const handleAddAvatar = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveAvatar = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
     startTransition(async () => {
       const image = form.getValues("image")
-      if (image?.trim()) await deleteFilesAction([image])
+      if (image?.trim()) await deleteImages([image])
       router.push("/users")
     })
   }
@@ -143,6 +157,18 @@ const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
                 </div>
                 <div className="col-span-2 grid lg:col-span-1">
                   <InputField control={form.control} label="Email" name="email" type="email" disabled={isPending} />
+                </div>
+                <div className="col-span-2 grid lg:col-span-1">
+                  <PhoneField control={form.control} label="Phone" name="phone" disabled={isPending} defaultCountry="GH" />
+                </div>
+                <div className="col-span-2 grid lg:col-span-1">
+                  <DateField
+                    control={form.control}
+                    name="dob"
+                    label="Date of birth"
+                    disabled={isPending}
+                    disabledDates={(date) => date > new Date() || date < new Date("1900-01-01")}
+                  />
                 </div>
                 <div className="col-span-2 grid lg:col-span-1">
                   <SelectField control={form.control} label="System Role" name="systemRole" options={systemRoleOptions} disabled={isPending} loadingPlaceholder="Admin" />
@@ -206,6 +232,32 @@ const AddUserForm = ({ stores }: { stores: StoreForSelect[] }) => {
                 </CardContent>
               </Card>
             )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Settings</CardTitle>
+                <CardDescription>Settings for this user.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup className="gap-3">
+                  <SwitchCardField
+                    control={form.control}
+                    name="getMarketingEmails"
+                    label="Marketing emails"
+                    description="Receive emails about new products,  and more."
+                    disabled={isPending}
+                  />
+                  <SwitchCardField
+                    control={form.control}
+                    name="getSecurityEmails"
+                    label="Security emails"
+                    description="Receive emails about account security."
+                    disabled={isPending}
+                  />
+                  <SwitchCardField control={form.control} name="getOrderEmails" label="Order emails" description="Receive emails about order updates." disabled={isPending} />
+                </FieldGroup>
+              </CardContent>
+            </Card>
           </div>
 
           <ResourceFormFooter backTo="/users" isPending={isPending} isDirty={form.formState.isDirty} handleDiscard={handleDiscard} />

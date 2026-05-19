@@ -12,14 +12,10 @@ import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "@bs42/ui/components/sonner"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
+import { Session } from "@/lib/auth"
 
 interface UpdateProfileFormProps {
-  user: {
-    id: string
-    name: string
-    email: string
-    image?: string | null
-  }
+  user: Session["user"]
 }
 
 const UpdateProfileForm = ({ user }: UpdateProfileFormProps) => {

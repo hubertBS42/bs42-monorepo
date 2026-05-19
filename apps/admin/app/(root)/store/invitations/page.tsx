@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { InvitationsFilters } from "@/types"
-import { fetchStoreInvitations } from "@/lib/data/invitations.data"
+import { getInvitationsForTable } from "@/lib/data/invitations.data"
 import InviteMemberModal from "./_components/invite-member-modal"
 import InvitationsTable from "./_components/invitations-table"
 
@@ -29,7 +29,7 @@ const StoreInvitationsPage = async ({ searchParams }: StoreInvitationsPageProps)
     order: params.order as "asc" | "desc" | undefined,
   }
 
-  const result = await fetchStoreInvitations(filters)
+  const result = await getInvitationsForTable(filters)
   if (!result.success) throw new Error(result.error)
 
   return (

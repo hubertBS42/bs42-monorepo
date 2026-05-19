@@ -15,11 +15,11 @@ import { z } from "zod"
 import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { Store, StoreStatus } from "@/types"
-import { deleteFilesAction, restoreFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import ImageField from "@bs42/ui/components/image-field"
 import dynamic from "next/dynamic"
 import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
 import DescriptionField from "@/components/description-field"
+import { deleteImages, restoreImages, uploadImages } from "@/lib/storage"
 
 const DeleteStore = dynamic(() => import("./delete-store"), {
   ssr: false,
@@ -67,29 +67,29 @@ const EditStoreForm = ({ store }: { store: Store }) => {
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
   const handleDiscard = async () => {
     startTransition(async () => {
       const logo = form.getValues("logo")
       // delete new logo
       if (logo && !store.logo) {
-        await deleteFilesAction([logo])
+        await deleteImages([logo])
       }
 
       // delete new logo and restore previous logo
       if (logo && store.logo && logo !== store.logo) {
-        await deleteFilesAction([logo])
-        await restoreFilesAction([store.logo])
+        await deleteImages([logo])
+        await restoreImages([store.logo])
       }
 
       // restore deleted logo
       if (!logo && store.logo) {
-        await restoreFilesAction([store.logo])
+        await restoreImages([store.logo])
       }
 
       router.push("/stores")

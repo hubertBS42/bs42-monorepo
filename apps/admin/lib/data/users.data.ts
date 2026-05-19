@@ -7,7 +7,7 @@ import { formatError } from "@bs42/auth/server"
 import { UsersData, UsersFilters, UserDetails } from "@/types"
 import { DataResponse } from "@bs42/types"
 
-export async function getAllUsers(filters: UsersFilters = {}): Promise<DataResponse<UsersData>> {
+export async function getUsersForTable(filters: UsersFilters = {}): Promise<DataResponse<UsersData>> {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }
@@ -67,6 +67,7 @@ export async function getUserById(userId: string): Promise<DataResponse<UserDeta
       where: { id: userId, role: { in: allowedRoles } },
       include: {
         sessions: { orderBy: { createdAt: "desc" } },
+        addresses: { orderBy: { createdAt: "desc" } },
         members: {
           include: { organization: true },
         },

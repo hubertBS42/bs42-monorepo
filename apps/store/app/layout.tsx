@@ -28,7 +28,11 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>
           <TooltipProvider>
-            {children}
+            <div className="flex h-screen flex-col">
+              header
+              <main className="wrapper flex-1">{children}</main>
+              footer
+            </div>
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>

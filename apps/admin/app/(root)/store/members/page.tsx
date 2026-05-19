@@ -28,8 +28,8 @@ const StoreMembersPage = async ({ searchParams }: StoreMembersPageProps) => {
     order: params.order as "asc" | "desc" | undefined,
   }
 
-  const result = await getStoreMembers(filters)
-  if (!result.success) throw new Error(result.error)
+  const response = await getStoreMembers(filters)
+  if (!response.success) throw new Error(response.error)
 
   return (
     <main className="flex flex-col gap-y-6">
@@ -37,7 +37,7 @@ const StoreMembersPage = async ({ searchParams }: StoreMembersPageProps) => {
         <h2 className="text-xl font-bold md:text-2xl">Manage Members</h2>
         <p className="text-sm text-muted-foreground">View and manage this store&apos;s members.</p>
       </div>
-      <MembersTable data={result.data} />
+      <MembersTable data={response.data} />
     </main>
   )
 }

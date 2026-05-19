@@ -42,7 +42,7 @@ const NavMain = () => {
   const { navItems, isGlobalWorkspace, isAdmin, isLoading } = useNavItems()
 
   const isActive = (url: string): boolean => {
-    if (pathname.includes("/add")) {
+    if (pathname.includes("/add") || pathname.includes("/create")) {
       const parts = pathname.split("/")
       parts.pop()
       return parts.join("/") === url

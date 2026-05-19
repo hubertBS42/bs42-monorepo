@@ -20,7 +20,7 @@ const TextAreaField = <T extends FieldValues>({ control, name, description, labe
         <Field className="grid gap-y-1" data-invalid={fieldState.invalid}>
           {label && <FieldLabel htmlFor={name}>{label}</FieldLabel>}
 
-          <Textarea {...textAreaProps} {...field} id={name} />
+          <Textarea {...field} value={field.value ?? ""} id={name} aria-invalid={fieldState.invalid} {...textAreaProps} />
           {description && <FieldDescription>{description}</FieldDescription>}
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>

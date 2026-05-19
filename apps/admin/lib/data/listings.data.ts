@@ -4,11 +4,11 @@ import { formatError } from "@bs42/auth/server"
 import { DataResponse } from "@bs42/types"
 import { isUUID } from "validator"
 import { Prisma } from "@bs42/db/client"
-import { ListingsData, ListingsFilters, ListingDetails } from "@/types"
+import { ListingsData, ListingsFilters, ListingDetails, ListingForOrder } from "@/types"
 import { auth } from "../auth"
 import { headers } from "next/headers"
 
-export const getStoreListings = async (filters: ListingsFilters = {}): Promise<DataResponse<ListingsData>> => {
+export const getListingsForTable = async (filters: ListingsFilters = {}): Promise<DataResponse<ListingsData>> => {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }
@@ -30,18 +30,28 @@ export const getStoreListings = async (filters: ListingsFilters = {}): Promise<D
     const [listings, total] = await Promise.all([
       prisma.storeListing.findMany({
         where,
-        include: {
+        select: {
+          id: true,
           product: {
-            include: {
-              brand: true,
-              categories: true,
+            select: {
+              name: true,
+              images: true,
+              brand: {
+                select: {
+                  name: true,
+                },
+              },
+              hasVariants: true,
+              categories: {
+                select: { name: true },
+              },
             },
           },
-          storeListingVariants: {
-            include: {
-              variant: true,
-            },
-          },
+          sellPrice: true,
+          stock: true,
+          isFeatured: true,
+          status: true,
+          createdAt: true,
         },
         orderBy,
         skip: (page - 1) * pageSize,
@@ -65,6 +75,99 @@ export const getStoreListings = async (filters: ListingsFilters = {}): Promise<D
   }
 }
 
+export const getListingsForOrder = async (): Promise<DataResponse<ListingForOrder[]>> => {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const activeStoreId = session.session.activeOrganizationId
+    if (!activeStoreId) return { success: false, error: "No active store" }
+
+    const where: Prisma.StoreListingWhereInput = {
+      organizationId: activeStoreId,
+    }
+
+    const listings = await prisma.storeListing.findMany({
+      where,
+      select: {
+        id: true,
+        product: {
+          select: {
+            sku: true,
+            name: true,
+            brand: {
+              select: { name: true },
+            },
+            hasVariants: true,
+            images: true,
+          },
+        },
+        sellPrice: true,
+        storeListingVariants: {
+          select: {
+            id: true,
+            sellPrice: true,
+            variantId: true,
+            variant: {
+              select: {
+                sku: true,
+                variantValues: {
+                  select: {
+                    optionValue: {
+                      select: { option: true, value: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        organization: {
+          select: { name: true },
+        },
+      },
+    })
+
+    return {
+      success: true,
+      data: listings,
+    }
+  } catch (error) {
+    return { success: false, error: formatError(error) }
+  }
+}
+export const getListingsForBrowser = async (): Promise<DataResponse<{ product: { id: string } }[]>> => {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const activeStoreId = session.session.activeOrganizationId
+    if (!activeStoreId) return { success: false, error: "No active store" }
+
+    const where: Prisma.StoreListingWhereInput = {
+      organizationId: activeStoreId,
+    }
+
+    const listings = await prisma.storeListing.findMany({
+      where,
+      select: {
+        product: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    return {
+      success: true,
+      data: listings,
+    }
+  } catch (error) {
+    return { success: false, error: formatError(error) }
+  }
+}
+
 export const getStoreListingById = async (listingId: string): Promise<DataResponse<ListingDetails>> => {
   try {
     if (!listingId || !isUUID(listingId)) return { success: false, error: "Missing or invalid listing ID." }
@@ -78,25 +181,37 @@ export const getStoreListingById = async (listingId: string): Promise<DataRespon
     const listing = await prisma.storeListing.findUnique({
       where: { id: listingId, organizationId: activeStoreId },
       include: {
+        storeListingVariants: true,
         product: {
-          include: {
-            brand: true,
-            categories: true,
+          select: {
+            name: true,
+            brand: { select: { name: true } },
+            categories: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            images: true,
+            hasVariants: true,
             variants: {
-              include: {
+              select: {
+                id: true,
                 variantValues: {
-                  include: {
+                  select: {
                     optionValue: {
-                      include: { option: true },
+                      select: {
+                        option: {
+                          select: { name: true },
+                        },
+                        value: true,
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-        storeListingVariants: {
-          include: { variant: true },
         },
       },
     })

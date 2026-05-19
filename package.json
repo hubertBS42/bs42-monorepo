@@ -21,13 +21,12 @@
   "devDependencies": {
     "@bs42/eslint-config": "workspace:*",
     "@bs42/typescript-config": "workspace:*",
-    "@dotenvx/dotenvx": "^1.60.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",
     "typescript": "5.9.3"
   },
-  "packageManager": "pnpm@11.1.1",
+  "packageManager": "pnpm@11.1.2",
   "engines": {
     "node": ">=20"
   }

@@ -27,6 +27,34 @@ enum OrganizationStatus {
   SUSPENDED
 }
 
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum ShippingMethod {
+  DELIVERY
+  PICKUP
+}
+
 model Address {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @db.Uuid
@@ -65,17 +93,32 @@ model User {
   banReason  String?
   banExpires DateTime?
 
-  addresses   Address[]
-  cart        Cart?
-  orders      Order[]
-  reviews     Review[]
-  sessions    Session[]
-  accounts    Account[]
-  members     Member[]
-  invitations Invitation[]
+  addresses     Address[]
+  cart          Cart?
+  orders        Order[]
+  reviews       Review[]
+  sessions      Session[]
+  accounts      Account[]
+  members       Member[]
+  invitations   Invitation[]
+  createdOrders Order[]              @relation("OrderCreatedBy")
+  statusChanges OrderStatusHistory[]
 
   @@unique([email])
   @@map("user")
+}
+
+model ExchangeRate {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  from      String // "USD"
+  to        String // "GHS"
+  rate      Decimal  @db.Decimal(12, 6)
+  date      DateTime @db.Date // the date this rate applies to
+  fetchedAt DateTime @default(now())
+
+  @@unique([from, to, date]) // one rate per currency pair per day
+  @@index([from, to])
+  @@map("exchange_rate")
 }
 
 model Brand {
@@ -279,6 +322,7 @@ model StoreListingVariant {
   lowStockThreshold Int            @default(0)
   stock             Int            @default(0)
   cartItems         CartItem[]
+  orderItems        OrderItem[]
   status            Status         @default(DRAFT)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -316,51 +360,115 @@ model CartItem {
 }
 
 model Order {
-  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId          String      @db.Uuid
-  shippingAddress Json        @db.Json
-  paymentMethod   String
-  paymentResult   Json?       @db.Json
-  itemsPrice      Decimal     @db.Decimal(12, 2)
-  shippingPrice   Decimal     @db.Decimal(12, 2)
-  taxPrice        Decimal     @db.Decimal(12, 2)
-  totalPrice      Decimal     @db.Decimal(12, 2)
-  isPaid          Boolean     @default(false)
-  paidAt          DateTime?   @db.Timestamp(6)
-  isDelivered     Boolean     @default(false)
-  deliveredAt     DateTime?   @db.Timestamp(6)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderitems      OrderItem[]
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
+  // Customer
+  userId        String? @db.Uuid
+  user          User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName  String
+  customerEmail String
+  customerPhone String?
+
+  shippingMethod ShippingMethod @default(DELIVERY)
+
+  // Shipping address snapshot
+  shippingName   String?
+  shippingPhone  String?
+  shippingLine1  String?
+  shippingLine2  String?
+  shippingRegion String?
+  shippingTown   String?
+  shippingLat    Float?
+  shippingLng    Float?
+
+  // Payment
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PENDING)
+  paidAt        DateTime?
+
+  // Status
+  status OrderStatus @default(PENDING)
+
+  // Pricing (USD)
+  subtotalUsd Decimal @db.Decimal(12, 2)
+
+  // Pricing (GHS)
+  subtotalGhs   Decimal @db.Decimal(12, 2) // subtotalUsd * exchangeRate
+  shippingPrice Decimal @db.Decimal(12, 2) // set by staff
+  taxPrice      Decimal @db.Decimal(12, 2) // set by staff
+  totalPrice    Decimal @db.Decimal(12, 2) // subtotalGhs + shippingPrice + taxPrice
+
+  // Currency
+  currency     String  @default("GHS")
+  exchangeRate Decimal @db.Decimal(12, 6) // rate at time of order
+
+  // POS
+  createdById String? @db.Uuid
+  createdBy   User?   @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Reference number
+  reference String @unique
+
+  notes         String?
+  orderItems    OrderItem[]
+  statusHistory OrderStatusHistory[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([reference])
   @@map("order")
 }
 
-model OrderItem {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderId        String  @db.Uuid
-  productId      String  @db.Uuid
-  variantId      String? @db.Uuid
-  storeListingId String  @db.Uuid
-
-  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
-  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product      Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
-  storeListing StoreListing    @relation(fields: [storeListingId], references: [id], onDelete: Restrict)
-
-  qty   Int
-  price Decimal @db.Decimal(12, 2)
-
-  // Snapshot data (captured at order time)
-  name               String
-  slug               String
-  image              String
-  storeName          String // snapshot of store name at order time
-  variantDescription String?
-  sku                String?
+model OrderStatusHistory {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId     String      @db.Uuid
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      OrderStatus
+  note        String?
+  changedById String?     @db.Uuid
+  changedBy   User?       @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
 
   @@index([orderId])
+  @@map("order_status_history")
+}
+
+model OrderItem {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  storeListingId String       @db.Uuid
+  storeListing   StoreListing @relation(fields: [storeListingId], references: [id], onDelete: Restrict)
+
+  storeListingVariantId String?              @db.Uuid
+  storeListingVariant   StoreListingVariant? @relation(fields: [storeListingVariantId], references: [id], onDelete: Restrict)
+
+  quantity Int
+
+  // Prices in USD
+  unitPrice  Decimal @db.Decimal(12, 2)
+  totalPrice Decimal @db.Decimal(12, 2)
+
+  // Snapshot
+  productName        String
+  productSlug        String
+  productImage       String?
+  variantDescription String?
+  sku                String?
+  storeName          String
+  product            Product?        @relation(fields: [productId], references: [id])
+  productId          String?         @db.Uuid
+  productVariant     ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId   String?         @db.Uuid
+
+  @@index([orderId])
+  @@index([organizationId])
   @@index([storeListingId])
   @@map("order_item")
 }
@@ -449,6 +557,7 @@ model Organization {
   members        Member[]
   invitations    Invitation[]
   listings       StoreListing[]
+  orderItems     OrderItem[]
 
   @@unique([slug])
   @@map("store")

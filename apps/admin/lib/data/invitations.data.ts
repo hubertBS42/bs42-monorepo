@@ -7,7 +7,7 @@ import { prisma } from "@bs42/db"
 import { formatError } from "@bs42/auth/server"
 import { DataResponse } from "@bs42/types"
 
-export const fetchStoreInvitations = async (filters: InvitationsFilters = {}): Promise<DataResponse<InvitationsData>> => {
+export const getInvitationsForTable = async (filters: InvitationsFilters = {}): Promise<DataResponse<InvitationsData>> => {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { success: false, error: "Unauthorized" }

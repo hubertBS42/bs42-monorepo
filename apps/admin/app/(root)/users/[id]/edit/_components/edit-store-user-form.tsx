@@ -19,7 +19,7 @@ import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { Badge } from "@bs42/ui/components/badge"
 import { updateUserAction } from "@/lib/actions/user.actions"
-import { deleteFilesAction, restoreFilesAction } from "@/lib/actions/storage.actions"
+import { deleteImages, restoreImages } from "@/lib/storage"
 
 const EditStoreUserForm = ({ user, stores }: { user: UserDetails; stores: StoreForSelect[] }) => {
   const router = useRouter()
@@ -33,6 +33,11 @@ const EditStoreUserForm = ({ user, stores }: { user: UserDetails; stores: StoreF
       name: user.name,
       email: user.email,
       image: user.image ?? "",
+      phone: user.phone,
+      dob: user.dob,
+      getMarketingEmails: user.getMarketingEmails,
+      getSecurityEmails: user.getSecurityEmails,
+      getOrderEmails: user.getOrderEmails,
       stores: user.members
         .sort((a, b) => a.organization.name.localeCompare(b.organization.name))
         .map((m) => ({
@@ -66,6 +71,11 @@ const EditStoreUserForm = ({ user, stores }: { user: UserDetails; stores: StoreF
         email: data.email,
         name: data.name,
         image: data.image,
+        phone: data.phone ?? null,
+        dob: data.dob ?? null,
+        getMarketingEmails: data.getMarketingEmails,
+        getOrderEmails: data.getOrderEmails,
+        getSecurityEmails: data.getSecurityEmails,
         stores: data.stores,
         removedMembers: removedMembers,
       })
@@ -85,18 +95,18 @@ const EditStoreUserForm = ({ user, stores }: { user: UserDetails; stores: StoreF
       const image = form.getValues("image")
       // delete new image
       if (image && !user.image) {
-        await deleteFilesAction([image])
+        await deleteImages([image])
       }
 
       // delete new image and restore previous image
       if (image && user.image && image !== user.image) {
-        await deleteFilesAction([image])
-        await restoreFilesAction([user.image])
+        await deleteImages([image])
+        await restoreImages([user.image])
       }
 
       // restore deleted image
       if (!image && user.image) {
-        await restoreFilesAction([user.image])
+        await restoreImages([user.image])
       }
 
       router.push("/users")

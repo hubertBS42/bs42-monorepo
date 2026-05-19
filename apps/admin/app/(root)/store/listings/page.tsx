@@ -1,5 +1,5 @@
 import AddButton from "@/components/add-button"
-import { getStoreListings } from "@/lib/data/listings.data"
+import { getListingsForTable } from "@/lib/data/listings.data"
 import { ListingsFilters } from "@/types"
 import { Metadata } from "next"
 import ListingsTable from "./_components/listings-table"
@@ -27,7 +27,7 @@ const StoreListingsPage = async ({ searchParams }: StoreListingsPageProps) => {
     order: params.order as "asc" | "desc" | undefined,
   }
 
-  const response = await getStoreListings(filters)
+  const response = await getListingsForTable(filters)
   if (!response.success) throw new Error(response.error)
   return (
     <main className="flex flex-col gap-y-6">

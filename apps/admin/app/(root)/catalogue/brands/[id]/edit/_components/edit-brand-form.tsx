@@ -13,7 +13,6 @@ import ResourceFormHeader from "@/components/resource-form-header"
 import ResourceFormFooter from "@/components/resource-form-footer"
 import { useTransition } from "react"
 import { updateBrandAction } from "@/lib/actions/brand.actions"
-import { deleteFilesAction, restoreFilesAction, uploadImagesAction } from "@/lib/actions/storage.actions"
 import ImageField from "@bs42/ui/components/image-field"
 import TextAreaField from "@bs42/ui/components/textarea-field"
 import SwitchCardField from "@bs42/ui/components/switch-card-field"
@@ -21,6 +20,7 @@ import { BRAND_STATUS_OPTIONS } from "@/constants"
 import { Brand, Status } from "@bs42/db/client"
 import dynamic from "next/dynamic"
 import ButtonSkeleton from "@bs42/ui/components/button-skeleton"
+import { deleteImages, restoreImages, uploadImages } from "@/lib/storage"
 
 const DeleteBrand = dynamic(() => import("./delete-brand"), {
   ssr: false,
@@ -67,11 +67,11 @@ const EditBrandForm = ({ brand }: { brand: Brand }) => {
   const handleAddLogo = async (data: FileList) => {
     const formData = new FormData()
     Array.from(data).forEach((file) => formData.append("files", file))
-    return uploadImagesAction(formData)
+    return await uploadImages(formData)
   }
 
   const handleRemoveLogo = async (url: string) => {
-    await deleteFilesAction([url])
+    await deleteImages([url])
   }
 
   const handleDiscard = async () => {
@@ -79,18 +79,18 @@ const EditBrandForm = ({ brand }: { brand: Brand }) => {
       const logo = form.getValues("logo")
       // delete new logo
       if (logo && !brand.logo) {
-        await deleteFilesAction([logo])
+        await deleteImages([logo])
       }
 
       // delete new logo and restore previous logo
       if (logo && brand.logo && logo !== brand.logo) {
-        await deleteFilesAction([logo])
-        await restoreFilesAction([brand.logo])
+        await deleteImages([logo])
+        await restoreImages([brand.logo])
       }
 
       // restore deleted logo
       if (!logo && brand.logo) {
-        await restoreFilesAction([brand.logo])
+        await restoreImages([brand.logo])
       }
 
       router.push("/catalogue/brands")

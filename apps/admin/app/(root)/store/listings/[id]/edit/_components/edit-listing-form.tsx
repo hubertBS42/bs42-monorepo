@@ -41,7 +41,6 @@ const EditListingForm = ({ listing }: EditListingFormProps) => {
     resolver: zodResolver(updateListingFormSchema),
     defaultValues: {
       id: listing.id,
-      organizationId: listing.organizationId,
       productId: listing.productId,
       sellPrice: Number(listing.sellPrice),
       buyPrice: Number(listing.buyPrice),
@@ -132,8 +131,8 @@ const EditListingForm = ({ listing }: EditListingFormProps) => {
                 <CardContent>
                   <FieldGroup>
                     <div className="grid gap-5 sm:grid-cols-3">
-                      <NumberField control={form.control} label="Sell Price" name="sellPrice" step={0.01} prependText="$" disabled={isPending} />
                       <NumberField control={form.control} label="Buy Price" name="buyPrice" step={0.01} prependText="$" disabled={isPending} />
+                      <NumberField control={form.control} label="Sell Price" name="sellPrice" step={0.01} prependText="$" disabled={isPending} />
                       <NumberField control={form.control} label="Compare At Price" name="compareAtPrice" step={0.01} prependText="$" disabled={isPending} />
                     </div>
                   </FieldGroup>

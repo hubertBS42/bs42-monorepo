@@ -36,3 +36,12 @@ export type FlatNode<T> = Omit<T, "children"> & {
   parentId: string | null
   depth: number
 }
+
+export type StepStatus = "completed" | "current" | "upcoming"
+
+export interface Step {
+  id: string
+  title: string
+  description?: string
+  status: StepStatus
+}
