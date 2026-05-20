@@ -18,9 +18,21 @@ interface ComboboxFieldProps<T extends FieldValues> {
   options: { label: string; value: string }[]
   disabled?: boolean
   modal?: boolean
+  onChange?: (value: string) => void
 }
 
-const ComboboxField = <T extends FieldValues>({ control, name, description, label, placeholder, searchPlaceholder, options, disabled, modal = false }: ComboboxFieldProps<T>) => {
+const ComboboxField = <T extends FieldValues>({
+  control,
+  name,
+  description,
+  label,
+  placeholder,
+  searchPlaceholder,
+  options,
+  disabled,
+  modal = false,
+  onChange,
+}: ComboboxFieldProps<T>) => {
   const [open, setOpen] = useState(false)
   return (
     <Controller
@@ -51,6 +63,9 @@ const ComboboxField = <T extends FieldValues>({ control, name, description, labe
                         value={option.value}
                         key={option.value}
                         onSelect={() => {
+                          if (onChange) {
+                            onChange(option.value)
+                          }
                           field.onChange(option.value)
                           setOpen(false)
                         }}

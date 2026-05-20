@@ -9,7 +9,7 @@ import { FieldGroup } from "@bs42/ui/components/field"
 import InputField from "@bs42/ui/components/input-field"
 import NumberField from "@bs42/ui/components/number-field"
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react"
-import { useCallback, useEffect, useState, useTransition } from "react"
+import { useCallback, useEffect, useRef, useState, useTransition } from "react"
 import { Address } from "@bs42/db/client"
 import { DataResponse } from "@bs42/types"
 import { cn } from "@bs42/ui/lib/utils"
@@ -17,6 +17,9 @@ import PhoneField from "@bs42/ui/components/phone-field"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@bs42/ui/components/tabs"
 import ComboboxField from "@bs42/ui/components/combobox-field"
 import { GEODATA } from "@bs42/ui/constants"
+import { formatCurrency } from "@bs42/utils"
+import SwitchCardField from "@bs42/ui/components/switch-card-field"
+import SelectField from "@bs42/ui/components/select-field"
 
 type FormValues = z.infer<typeof createOrderFormSchema>
 
@@ -24,13 +27,17 @@ interface ShippingStepProps {
   form: UseFormReturn<FormValues>
   onBack: () => void
   onNext: () => void
+  exchangeRate: number
 }
 
-const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
+const ShippingStep = ({ form, onBack, onNext, exchangeRate }: ShippingStepProps) => {
   const [isPending, startTransition] = useTransition()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [addressTab, setAddressTab] = useState<"saved" | "manual">("manual")
+  const [fetchTrigger, setFetchTrigger] = useState(0)
+
+  const isAddressSelectedRef = useRef(false)
 
   const userId = form.watch("userId")
   const customerName = form.watch("customerName")
@@ -38,11 +45,25 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
   const shippingMethod = form.watch("shippingMethod")
   const shippingLine1 = form.watch("shippingLine1")
   const selectedRegion = form.watch("shippingRegion")
+  const applyDiscount = form.watch("applyDiscount")
+  const discountType = form.watch("discountType")
+  const discountValue = form.watch("discountValue")
+  const items = form.watch("items")
+
+  const subtotalUsd = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+  const subtotalGhs = subtotalUsd * exchangeRate
+
+  const discountAmount = (() => {
+    if (!discountType || !discountValue) return 0
+    if (discountType === "FIXED") return discountValue
+    return (subtotalGhs * discountValue) / 100
+  })()
 
   const towns = GEODATA.find((region) => region.name === selectedRegion)?.towns ?? []
 
   const handleSelectAddress = useCallback(
     (address: Address) => {
+      isAddressSelectedRef.current = true
       setSelectedAddressId(address.id)
       form.setValue("shippingName", address.name)
       form.setValue("shippingPhone", address.phone)
@@ -57,6 +78,10 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
   )
 
   useEffect(() => {
+    if (isAddressSelectedRef.current) {
+      isAddressSelectedRef.current = false
+      return
+    }
     form.setValue("shippingTown", "")
   }, [selectedRegion, form])
 
@@ -78,7 +103,7 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
         setAddressTab("manual")
       }
     })
-  }, [userId, handleSelectAddress])
+  }, [userId, handleSelectAddress, fetchTrigger])
 
   const handleSameAsCustomer = () => {
     form.setValue("shippingName", customerName)
@@ -86,16 +111,19 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
   }
 
   const handleNext = async () => {
-    if (shippingMethod === "pickup") {
-      const valid = await form.trigger(["shippingPrice", "taxPrice"])
-      if (valid) onNext()
-      return
+    const fieldsToValidate: (keyof FormValues)[] = ["shippingPrice", "taxPrice"]
+
+    if (shippingMethod === "delivery") {
+      fieldsToValidate.push("shippingName", "shippingLine1", "shippingRegion", "shippingTown")
     }
 
-    const valid = await form.trigger(["shippingName", "shippingLine1", "shippingRegion", "shippingTown", "shippingPrice", "taxPrice"])
+    if (applyDiscount) {
+      fieldsToValidate.push("discountValue")
+    }
+
+    const valid = await form.trigger(fieldsToValidate)
     if (valid) onNext()
   }
-
   const clearAddressFields = () => {
     form.setValue("shippingName", "")
     form.setValue("shippingPhone", "")
@@ -123,9 +151,9 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
               if (val === "pickup") {
                 clearAddressFields()
               } else if (val === "delivery" && userId) {
-                // Re-trigger address fetch by resetting
                 setAddresses([])
                 setAddressTab("manual")
+                setFetchTrigger((prev) => prev + 1)
               }
             }}
           >
@@ -199,6 +227,7 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
                         options={GEODATA.map((data) => ({ label: data.name, value: data.name }))}
                         placeholder="Select a region"
                         searchPlaceholder="Seach regions..."
+                        onChange={() => form.clearErrors("shippingRegion")}
                         modal
                       />
                       <ComboboxField
@@ -209,6 +238,7 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
                         options={towns.map((town) => ({ label: town, value: town }))}
                         placeholder="Select a town"
                         searchPlaceholder="Seach towns.."
+                        onChange={() => form.clearErrors("shippingTown")}
                         modal
                       />
                     </div>
@@ -231,7 +261,7 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
       <Card>
         <CardHeader>
           <CardTitle>Pricing</CardTitle>
-          <CardDescription>Set shipping and tax amounts.</CardDescription>
+          <CardDescription>Set shipping, tax and discount amounts.</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup>
@@ -239,10 +269,104 @@ const ShippingStep = ({ form, onBack, onNext }: ShippingStepProps) => {
               <NumberField control={form.control} name="shippingPrice" label="Shipping Price" step={0.01} prependText="GH₵" />
               <NumberField control={form.control} name="taxPrice" label="Tax" step={0.01} prependText="GH₵" />
             </div>
+
+            <SwitchCardField
+              control={form.control}
+              label="Apply Discount"
+              name="applyDiscount"
+              description="Apply a percentage or fixed discount to this order."
+              onChange={(checked) => {
+                if (!checked) {
+                  form.setValue("discountType", null)
+                  form.setValue("discountValue", null)
+                  form.setValue("discountReason", "")
+                  form.clearErrors("discountValue")
+                } else {
+                  form.setValue("discountType", "PERCENTAGE")
+                  form.setValue("discountValue", 0)
+                }
+              }}
+            />
+
+            {applyDiscount && (
+              <div className="rounded-md border p-4">
+                <FieldGroup>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <SelectField
+                      control={form.control}
+                      name="discountType"
+                      label="Discount Type"
+                      loadingPlaceholder="Percentage"
+                      options={[
+                        { label: "Percentage", value: "PERCENTAGE" },
+                        { label: "Fixed Amount", value: "FIXED" },
+                      ]}
+                      onChange={() => form.setValue("discountValue", null)}
+                    />
+                    <NumberField
+                      control={form.control}
+                      name="discountValue"
+                      label={discountType === "PERCENTAGE" ? "Percentage (%)" : "Amount (GH₵)"}
+                      step={discountType === "PERCENTAGE" ? 1 : 0.01}
+                      prependText={discountType === "PERCENTAGE" ? "%" : "GH₵"}
+                      max={discountType === "PERCENTAGE" ? 100 : undefined}
+                      onValueChange={() => form.clearErrors("discountValue")}
+                    />
+                  </div>
+                  {discountAmount > 0 && (
+                    <p className="text-sm text-muted-foreground">Discount amount: -{formatCurrency(discountAmount, "GHS", "en-GH", { currencyDisplay: "symbol" })}</p>
+                  )}
+                  <InputField control={form.control} name="discountReason" label="Reason (optional)" placeholder="e.g. Loyal customer, bulk order..." />
+                </FieldGroup>
+              </div>
+            )}
+
             <InputField control={form.control} name="notes" label="Notes (optional)" placeholder="Any special instructions..." />
           </FieldGroup>
         </CardContent>
       </Card>
+
+      {/* Discount */}
+      {/* {applyDiscount && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Discount</CardTitle>
+            <CardDescription>Apply discount to this order.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <SelectField
+                  control={form.control}
+                  name="discountType"
+                  label="Type"
+                  loadingPlaceholder="Percentage"
+                  options={["PERCENTAGE", "FIXED"].map((o) => ({ label: capitalizeFirstLetter(o), value: o }))}
+                  onChange={() => {
+                    form.setValue("discountValue", 0)
+                  }}
+                />
+                <NumberField
+                  control={form.control}
+                  name="discountValue"
+                  label="Value"
+                  step={discountType === "PERCENTAGE" ? 1 : 0.01}
+                  prependText={discountType === "PERCENTAGE" ? "%" : "GH₵"}
+                  max={discountType === "PERCENTAGE" ? 100 : undefined}
+                />
+              </div>
+              {discountAmount > 0 && <p className="text-xs text-muted-foreground">Discount: -{formatCurrency(discountAmount, "GHS", "en-GH", { currencyDisplay: "symbol" })}</p>}
+              <InputField
+                control={form.control}
+                name="discountReason"
+                label="Discount Reason (optional)"
+                placeholder="e.g. Loyal customer, bulk order..."
+                disabled={!discountType}
+              />
+            </FieldGroup>
+          </CardContent>
+        </Card>
+      )} */}
 
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>

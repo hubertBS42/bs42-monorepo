@@ -11,7 +11,6 @@ import UpdateOrderStatus from "./update-order-status"
 import { OrderStatus } from "@bs42/db/enums"
 import { MapPin } from "lucide-react"
 import OrderTimeline from "./order-timeline"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@bs42/ui/components/accordion"
 
 const STATUS_VARIANTS: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
   PENDING: "secondary",
@@ -62,7 +61,7 @@ const OrderDetail = ({ order }: OrderDetailsProps) => {
         {/* Left column */}
         <div className="grid auto-rows-max gap-y-4 lg:col-span-2">
           {/* Items grouped by store */}
-          {/* {Object.entries(groupedItems).map(([storeName, items]) => (
+          {Object.entries(groupedItems).map(([storeName, items]) => (
             <Card key={storeName}>
               <CardHeader>
                 <CardTitle className="text-base">{storeName}</CardTitle>
@@ -100,8 +99,8 @@ const OrderDetail = ({ order }: OrderDetailsProps) => {
                 </div>
               </CardContent>
             </Card>
-          ))} */}
-          <Card>
+          ))}
+          {/* <Card>
             <CardHeader>
               <CardTitle>Order Items</CardTitle>
             </CardHeader>
@@ -110,12 +109,40 @@ const OrderDetail = ({ order }: OrderDetailsProps) => {
                 {Object.entries(groupedItems).map(([storeName, items]) => (
                   <AccordionItem key={storeName} value={storeName}>
                     <AccordionTrigger>{storeName}</AccordionTrigger>
-                    {/* <AccordionContent>{item.content}</AccordionContent> */}
+                    <AccordionContent>
+                      <div className="grid gap-4">
+                        {items.map((item) => (
+                          <div key={item.id} className="flex items-center gap-4">
+                            <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-muted">
+                              {item.productImage && <Image src={item.productImage} alt={item.productName} fill sizes="56px" className="object-cover" />}
+                            </div>
+                            <div className="grid flex-1 gap-0.5">
+                              <p className="font-medium">{item.productName}</p>
+                              {item.variantDescription && <p className="text-xs text-muted-foreground">{item.variantDescription}</p>}
+                              {item.sku && <p className="font-mono text-xs text-muted-foreground">SKU: {item.sku}</p>}
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">
+                                {formatCurrency(Number(item.unitPrice) * Number(order.exchangeRate), "GHS", "en-GH", {
+                                  currencyDisplay: "symbol",
+                                })}
+                              </p>
+                              <p className="text-xs text-muted-foreground">× {item.quantity}</p>
+                              <p className="text-sm font-semibold">
+                                {formatCurrency(Number(item.totalPrice) * Number(order.exchangeRate), "GHS", "en-GH", {
+                                  currencyDisplay: "symbol",
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Order progress */}
           <Card>
@@ -161,6 +188,21 @@ const OrderDetail = ({ order }: OrderDetailsProps) => {
                     <span className="text-muted-foreground">Tax</span>
                     <span>
                       {formatCurrency(Number(order.taxPrice), "GHS", "en-GH", {
+                        currencyDisplay: "symbol",
+                      })}
+                    </span>
+                  </div>
+                )}
+                {order.discountAmount && Number(order.discountAmount) > 0 && (
+                  <div className="flex justify-between text-destructive">
+                    <span>
+                      Discount
+                      {order.discountType === "PERCENTAGE" && ` (${order.discountValue}%)`}
+                      {order.discountReason && ` · ${order.discountReason}`}
+                    </span>
+                    <span>
+                      -
+                      {formatCurrency(Number(order.discountAmount), "GHS", "en-GH", {
                         currencyDisplay: "symbol",
                       })}
                     </span>

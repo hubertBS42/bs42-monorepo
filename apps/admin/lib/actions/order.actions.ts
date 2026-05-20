@@ -17,7 +17,7 @@ export async function createOrderAction(data: z.infer<typeof createOrderFormSche
     const activeStoreId = session.session.activeOrganizationId
     if (!activeStoreId) return { success: false, error: "No active store" }
 
-    const validatedData = await createOrderFormSchema.parseAsync(data)
+    const validatedData = await createOrderFormSchema.parse(data)
 
     const exchangeRate = await prisma.exchangeRate.findFirst({
       where: { from: "USD", to: "GHS" },
@@ -53,7 +53,13 @@ export async function createOrderAction(data: z.infer<typeof createOrderFormSche
 
     const subtotalUsd = validatedData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
     const subtotalGhs = subtotalUsd * rate
-    const totalPrice = subtotalGhs + validatedData.shippingPrice + validatedData.taxPrice
+    const discountAmount = (() => {
+      if (!validatedData.discountType || !validatedData.discountValue) return 0
+      if (validatedData.discountType === "FIXED") return validatedData.discountValue
+      return (subtotalGhs * validatedData.discountValue) / 100
+    })()
+
+    const totalPrice = subtotalGhs + validatedData.shippingPrice + validatedData.taxPrice - discountAmount
 
     await prisma.order.create({
       data: {
@@ -77,6 +83,10 @@ export async function createOrderAction(data: z.infer<typeof createOrderFormSche
         subtotalGhs,
         shippingPrice: validatedData.shippingPrice,
         taxPrice: validatedData.taxPrice,
+        discountValue: validatedData.discountValue,
+        discountAmount,
+        discountType: validatedData.discountType,
+        discountReason: validatedData.discountReason,
         totalPrice,
         currency: "GHS",
         exchangeRate: rate,

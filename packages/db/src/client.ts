@@ -459,12 +459,13 @@ function createPrisma() {
               where: { id: productToDelete.id },
             })
 
-            // Delete product images + all variant images
-            const allImages = [...productToDelete.images, ...productToDelete.variants.flatMap((v) => v.images)]
-            const documents = productToDelete.documents.map((d) => d.url)
+            const files = [...productToDelete.images, ...productToDelete.variants.flatMap((v) => v.images)]
 
-            if (allImages.length) await deleteFiles(allImages)
-            if (documents.length) await deleteFiles(documents)
+            for (const document of productToDelete.documents) {
+              files.push(document.url)
+            }
+            // Delete product images and documents
+            if (files.length) await deleteFiles(files)
             return deletedProduct
           })
         },
@@ -483,14 +484,13 @@ function createPrisma() {
               },
             })
             const productIDs: string[] = []
-            const images: string[] = []
-            const documents: string[] = []
+            const files: string[] = []
 
             for (const product of productsToDelete) {
               productIDs.push(product.id)
-              images.push(...product.images)
-              images.push(...product.variants.flatMap((v) => v.images))
-              documents.push(...product.documents.flatMap((d) => d.url))
+              files.push(...product.images)
+              files.push(...product.variants.flatMap((v) => v.images))
+              files.push(...product.documents.flatMap((d) => d.url))
             }
 
             // Delete the products
@@ -499,8 +499,7 @@ function createPrisma() {
             })
 
             // Delete product images and documents
-            if (images.length) await deleteFiles(images)
-            if (documents.length) await deleteFiles(documents)
+            if (files.length) await deleteFiles(files)
 
             return deletedProducts
           })

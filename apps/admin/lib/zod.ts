@@ -3,18 +3,15 @@ import { StoreStatus } from "@/types"
 import { Condition, Status } from "@bs42/db/enums"
 import { z } from "zod"
 import { isURL, isUUID } from "validator"
-
-// Lazy load phone validator only when needed
-const getPhoneValidator = () => import("@bs42/ui/lib/utils").then((mod) => mod.isPossiblePhoneNumber)
+import { isPossiblePhoneNumber } from "@bs42/ui/lib/utils"
 
 // Optional phone schema (for fields that can be null/empty)
 const optionalPhoneSchema = z
   .string()
   .nullable()
   .refine(
-    async (data) => {
+    (data) => {
       if (!data) return true
-      const isPossiblePhoneNumber = await getPhoneValidator()
       return isPossiblePhoneNumber(data)
     },
     { message: "Invalid phone number" }
@@ -24,13 +21,7 @@ const optionalPhoneSchema = z
 export const requiredPhoneSchema = z
   .string()
   .min(1, "Phone number is required")
-  .refine(
-    async (data) => {
-      const isPossiblePhoneNumber = await getPhoneValidator()
-      return isPossiblePhoneNumber(data)
-    },
-    { message: "Invalid phone number" }
-  )
+  .refine((data) => isPossiblePhoneNumber(data), { message: "Invalid phone number" })
 
 export const signInFormSchema = z.object({
   email: z.email("Invalid email address"),
@@ -448,13 +439,22 @@ export const createOrderFormSchema = z
     shippingTown: z.string().optional(),
     shippingLat: z.number().nullable().optional(),
     shippingLng: z.number().nullable().optional(),
+    applyDiscount: z.boolean(),
+    discountType: z.enum(["FIXED", "PERCENTAGE"]).nullable().optional(),
+    discountValue: z
+      .number()
+      .nullable()
+      .optional()
+      .refine((val) => val === null || val === undefined || val > 0, {
+        message: "Discount value must be greater than 0",
+      }),
+    discountReason: z.string().nullable().optional(),
     shippingPrice: z.number().min(0),
     taxPrice: z.number().min(0),
     notes: z.string().nullable().optional(),
   })
-  .superRefine(async (data, ctx) => {
+  .superRefine((data, ctx) => {
     if (data.shippingMethod === "delivery") {
-      const isPossiblePhoneNumber = await getPhoneValidator()
       if (!data.shippingName?.trim()) {
         ctx.addIssue({ code: "custom", message: "Recipient name is required", path: ["shippingName"] })
       }
@@ -472,6 +472,17 @@ export const createOrderFormSchema = z
       }
       if (!data.shippingTown?.trim()) {
         ctx.addIssue({ code: "custom", message: "Town is required", path: ["shippingTown"] })
+      }
+    }
+    if (data.applyDiscount) {
+      if (data.discountType === "PERCENTAGE" && data.discountValue) {
+        if (data.discountValue > 100) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Percentage discount cannot exceed 100%",
+            path: ["discountValue"],
+          })
+        }
       }
     }
   })

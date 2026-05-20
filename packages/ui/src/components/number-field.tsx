@@ -13,9 +13,10 @@ interface NumberFieldProps<T extends FieldValues> extends InputHTMLAttributes<HT
   max?: number
   step?: number
   prependText?: string
+  onValueChange?: (value: number) => void
 }
 
-const NumberField = <T extends FieldValues>({ control, name, description, label, min = 0, max, step = 1, prependText, ...inputProps }: NumberFieldProps<T>) => {
+const NumberField = <T extends FieldValues>({ control, name, description, label, min = 0, max, step = 1, prependText, onValueChange, ...inputProps }: NumberFieldProps<T>) => {
   // Helper function to round to specific decimal places (fixes floating point issues)
   const roundToPrecision = useCallback((value: number, step: number): number => {
     // Determine decimal places from step
@@ -32,15 +33,11 @@ const NumberField = <T extends FieldValues>({ control, name, description, label,
     (currentValue: number, onChange: (value: number) => void) => {
       const current = Number(currentValue || 0)
       const newValue = roundToPrecision(current + step, step)
-
-      // Check max constraint
-      if (max !== undefined && newValue > max) {
-        onChange(max)
-      } else {
-        onChange(newValue)
-      }
+      const finalValue = max !== undefined && newValue > max ? max : newValue
+      onChange(finalValue)
+      onValueChange?.(finalValue)
     },
-    [max, step, roundToPrecision]
+    [max, step, roundToPrecision, onValueChange]
   )
 
   // Handle decrement with validation
@@ -48,15 +45,11 @@ const NumberField = <T extends FieldValues>({ control, name, description, label,
     (currentValue: number, onChange: (value: number) => void) => {
       const current = Number(currentValue || 0)
       const newValue = roundToPrecision(current - step, step)
-
-      // Check min constraint
-      if (min !== undefined && newValue < min) {
-        onChange(min)
-      } else {
-        onChange(newValue)
-      }
+      const finalValue = min !== undefined && newValue < min ? min : newValue
+      onChange(finalValue)
+      onValueChange?.(finalValue)
     },
-    [min, step, roundToPrecision]
+    [min, step, roundToPrecision, onValueChange]
   )
   return (
     <Controller
@@ -66,6 +59,11 @@ const NumberField = <T extends FieldValues>({ control, name, description, label,
         <Field data-invalid={fieldState.invalid} className="grid gap-y-1">
           {label && <FieldLabel htmlFor={name}>{label}</FieldLabel>}
           <InputGroup className="relative overflow-hidden">
+            {prependText && (
+              <InputGroupAddon>
+                <InputGroupText>{prependText}</InputGroupText>
+              </InputGroupAddon>
+            )}
             <InputGroupInput
               {...field}
               value={field.value ?? ""}
@@ -92,14 +90,11 @@ const NumberField = <T extends FieldValues>({ control, name, description, label,
                 value = roundToPrecision(value, step)
 
                 // Enforce min/max constraints
-                if (min !== undefined && value < min) {
-                  value = min
-                }
-                if (max !== undefined && value > max) {
-                  value = max
-                }
+                if (min !== undefined && value < min) value = min
+                if (max !== undefined && value > max) value = max
 
                 field.onChange(value)
+                onValueChange?.(value)
               }}
               onBlur={(e) => {
                 field.onBlur()
@@ -114,11 +109,7 @@ const NumberField = <T extends FieldValues>({ control, name, description, label,
                 }
               }}
             />
-            {prependText && (
-              <InputGroupAddon>
-                <InputGroupText>{prependText}</InputGroupText>
-              </InputGroupAddon>
-            )}
+
             <InputGroupAddon align="inline-end" className="flex h-[calc(100%+2px)] flex-col gap-0 pr-1">
               <InputGroupButton
                 type="button"

@@ -55,6 +55,11 @@ enum ShippingMethod {
   PICKUP
 }
 
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
 model Address {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @db.Uuid
@@ -397,6 +402,11 @@ model Order {
   shippingPrice Decimal @db.Decimal(12, 2) // set by staff
   taxPrice      Decimal @db.Decimal(12, 2) // set by staff
   totalPrice    Decimal @db.Decimal(12, 2) // subtotalGhs + shippingPrice + taxPrice
+
+  discountType   DiscountType?
+  discountValue  Decimal?      @db.Decimal(12, 2) // flat GHS amount or percentage
+  discountAmount Decimal?      @db.Decimal(12, 2) // computed GHS amount stored for records
+  discountReason String?
 
   // Currency
   currency     String  @default("GHS")

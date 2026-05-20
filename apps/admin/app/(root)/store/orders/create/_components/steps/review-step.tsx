@@ -21,9 +21,19 @@ interface ReviewStepProps {
 
 const ReviewStep = ({ form, exchangeRate, isPending, onBack }: ReviewStepProps) => {
   const values = form.watch()
+  const discountType = values.discountType
+  const discountValue = values.discountValue ?? 0
 
-  const subtotal = values.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-  const total = subtotal + values.shippingPrice + values.taxPrice
+  const subtotalUsd = values.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+  const subtotalGhs = subtotalUsd * exchangeRate
+
+  const discountAmount = (() => {
+    if (!discountType || !discountValue) return 0
+    if (discountType === "FIXED") return discountValue
+    return (subtotalGhs * discountValue) / 100
+  })()
+
+  const total = subtotalGhs + values.shippingPrice + values.taxPrice - discountAmount
 
   return (
     <div className="grid gap-6">
@@ -62,40 +72,33 @@ const ReviewStep = ({ form, exchangeRate, isPending, onBack }: ReviewStepProps) 
               <div className="grid gap-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>
-                    {formatCurrency(subtotal * exchangeRate, "GHS", "en-GH", {
-                      currencyDisplay: "symbol",
-                    })}
-                  </span>
+                  <span>{formatCurrency(subtotalGhs, "GHS", "en-GH", { currencyDisplay: "symbol" })}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span>
-                    {formatCurrency(values.shippingPrice, "GHS", "en-GH", {
-                      currencyDisplay: "symbol",
-                    })}
-                  </span>
+                  <span>{formatCurrency(values.shippingPrice, "GHS", "en-GH", { currencyDisplay: "symbol" })}</span>
                 </div>
                 {values.taxPrice > 0 && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
+                    <span>{formatCurrency(values.taxPrice, "GHS", "en-GH", { currencyDisplay: "symbol" })}</span>
+                  </div>
+                )}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-destructive">
                     <span>
-                      {formatCurrency(values.taxPrice, "GHS", "en-GH", {
-                        currencyDisplay: "symbol",
-                      })}
+                      Discount
+                      {discountType === "PERCENTAGE" && ` (${discountValue}%)`}
+                      {values.discountReason && ` · ${values.discountReason}`}
                     </span>
+                    <span>-{formatCurrency(discountAmount, "GHS", "en-GH", { currencyDisplay: "symbol" })}</span>
                   </div>
                 )}
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>
-                    {formatCurrency(total * exchangeRate, "GHS", "en-GH", {
-                      currencyDisplay: "symbol",
-                    })}
-                  </span>
+                  <span>{formatCurrency(total, "GHS", "en-GH", { currencyDisplay: "symbol" })}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Rate: 1 USD = {exchangeRate.toFixed(2)} GHS</p>
               </div>
             </CardContent>
           </Card>

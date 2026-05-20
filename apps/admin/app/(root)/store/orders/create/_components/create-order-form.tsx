@@ -5,15 +5,10 @@ import { useRouter } from "next/navigation"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
-
 import { createOrderAction } from "@/lib/actions/order.actions"
 import { createOrderFormSchema } from "@/lib/zod"
-
 import { toast } from "@bs42/ui/components/sonner"
-
-import { ListingForOrder } from "@/types"
 import { Step } from "@bs42/types"
-
 import Header from "./steps/header"
 import ItemsStep from "./steps/items-step"
 import CustomerStep from "./steps/customer-step"
@@ -21,7 +16,7 @@ import ShippingStep from "./steps/shipping-step"
 import ReviewStep from "./steps/review-step"
 
 type CreateOrderFormProps = {
-  listings: ListingForOrder[]
+  organizationId: string
   exchangeRate: number
 }
 
@@ -52,7 +47,7 @@ const INITIAL_STEPS: Step[] = [
   },
 ]
 
-export default function CreateOrderForm({ listings, exchangeRate }: CreateOrderFormProps) {
+export default function CreateOrderForm({ organizationId, exchangeRate }: CreateOrderFormProps) {
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
@@ -76,10 +71,12 @@ export default function CreateOrderForm({ listings, exchangeRate }: CreateOrderF
       shippingLine2: "",
       shippingRegion: "",
       shippingTown: "",
-
       shippingPrice: 0,
       taxPrice: 0,
-
+      applyDiscount: false,
+      discountType: null,
+      discountValue: null,
+      discountReason: "",
       notes: "",
     },
     // mode: "onChange",
@@ -103,32 +100,19 @@ export default function CreateOrderForm({ listings, exchangeRate }: CreateOrderF
     })
   }
 
-  const goToStep = (stepId: string) => {
+  const goToStep = (stepId: string, markCurrentAs: "completed" | "upcoming" = "completed") => {
     setSteps((prev) =>
       prev.map((step) => ({
         ...step,
-        status: step.id === stepId ? "current" : step.status === "current" ? "upcoming" : step.status,
+        status: step.id === stepId ? "current" : step.status === "current" ? markCurrentAs : step.status,
       }))
     )
   }
-
-  const completeStep = (currentId: string, nextId?: string) => {
+  const completeStep = (currentId: string, nextId: string) => {
     setSteps((prev) =>
       prev.map((step) => {
-        if (step.id === currentId) {
-          return {
-            ...step,
-            status: "completed",
-          }
-        }
-
-        if (step.id === nextId) {
-          return {
-            ...step,
-            status: "current",
-          }
-        }
-
+        if (step.id === currentId) return { ...step, status: "completed" }
+        if (step.id === nextId) return { ...step, status: "current" }
         return step
       })
     )
@@ -140,13 +124,15 @@ export default function CreateOrderForm({ listings, exchangeRate }: CreateOrderF
       <Header steps={steps} onStepClick={(step) => goToStep(step.id)} />
 
       {/* Step Content */}
-      {currentStep?.id === "items" && <ItemsStep form={form} listings={listings} exchangeRate={exchangeRate} onNext={() => completeStep("items", "customer")} />}
+      {currentStep?.id === "items" && <ItemsStep form={form} exchangeRate={exchangeRate} organizationId={organizationId} onNext={() => completeStep("items", "customer")} />}
 
-      {currentStep?.id === "customer" && <CustomerStep form={form} onBack={() => goToStep("items")} onNext={() => completeStep("customer", "shipping")} />}
+      {currentStep?.id === "customer" && <CustomerStep form={form} onBack={() => goToStep("items", "upcoming")} onNext={() => completeStep("customer", "shipping")} />}
 
-      {currentStep?.id === "shipping" && <ShippingStep form={form} onBack={() => goToStep("customer")} onNext={() => completeStep("shipping", "review")} />}
+      {currentStep?.id === "shipping" && (
+        <ShippingStep form={form} onBack={() => goToStep("customer", "upcoming")} onNext={() => completeStep("shipping", "review")} exchangeRate={exchangeRate} />
+      )}
 
-      {currentStep?.id === "review" && <ReviewStep form={form} exchangeRate={exchangeRate} isPending={isPending} onBack={() => goToStep("shipping")} />}
+      {currentStep?.id === "review" && <ReviewStep form={form} exchangeRate={exchangeRate} isPending={isPending} onBack={() => goToStep("shipping", "upcoming")} />}
     </form>
   )
 }

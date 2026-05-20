@@ -18,6 +18,7 @@ interface SelectFieldProps<T extends FieldValues> {
   disabled?: boolean
   options: PrimitiveOption[] | SelectOption[]
   side?: "top" | "bottom" | "left" | "right"
+  onChange?: (value: string) => void
 }
 
 const PlaceholderComponent = ({ placeholderLabel, placeholderText }: { placeholderLabel?: string; placeholderText?: string }) => {
@@ -32,7 +33,19 @@ const PlaceholderComponent = ({ placeholderLabel, placeholderText }: { placehold
   )
 }
 
-const SelectField = <T extends FieldValues>({ control, name, description, label, side, size, placeholder, loadingPlaceholder, options, ...selectProps }: SelectFieldProps<T>) => {
+const SelectField = <T extends FieldValues>({
+  control,
+  name,
+  description,
+  label,
+  side,
+  onChange,
+  size,
+  placeholder,
+  loadingPlaceholder,
+  options,
+  ...selectProps
+}: SelectFieldProps<T>) => {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -60,7 +73,16 @@ const SelectField = <T extends FieldValues>({ control, name, description, label,
       render={({ field, fieldState }) => (
         <Field className="grid gap-1" data-invalid={fieldState.invalid}>
           {label && <FieldLabel htmlFor={name}>{label}</FieldLabel>}
-          <Select onValueChange={field.onChange} value={field.value} {...selectProps}>
+          <Select
+            onValueChange={(value) => {
+              field.onChange(value)
+              if (onChange) {
+                onChange(value)
+              }
+            }}
+            value={field.value}
+            {...selectProps}
+          >
             <SelectTrigger size={size} className="w-full" id={name} aria-invalid={fieldState.invalid}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
